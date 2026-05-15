@@ -2,7 +2,38 @@ export type NaverLatLng = object
 
 export type NaverSize = object
 
+export type GeoJsonFeatureCollection = {
+  features: Array<Record<string, unknown>>
+  type: 'FeatureCollection'
+  [key: string]: unknown
+}
+
+export type NaverMapDataFeature = {
+  getProperty: (propertyName: string) => unknown
+}
+
+export type NaverMapDataStyleOptions = {
+  clickable?: boolean
+  fillColor?: string
+  fillOpacity?: number
+  strokeColor?: string
+  strokeOpacity?: number
+  strokeWeight?: number
+}
+
+export type NaverMapDataLayer = {
+  addGeoJson: (
+    geoJson: GeoJsonFeatureCollection,
+  ) => NaverMapDataFeature[]
+  setStyle: (
+    style:
+      | NaverMapDataStyleOptions
+      | ((feature: NaverMapDataFeature) => NaverMapDataStyleOptions),
+  ) => void
+}
+
 export type NaverMap = {
+  data: NaverMapDataLayer
   setSize: (size: NaverSize) => void
 }
 

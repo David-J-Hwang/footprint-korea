@@ -1,6 +1,31 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadNaverMapsScript } from '../../../lib/naverMapsLoader'
-import type { NaverMap as NaverMapInstance } from '../../../types/naverMaps'
+import type {
+  GeoJsonFeatureCollection,
+  NaverMap as NaverMapInstance,
+} from '../../../types/naverMaps'
+
+const SIGUNGU_GEOJSON_URL = `${import.meta.env.BASE_URL}geojson/TL_SCCO_SIG.json`
+
+async function addSigunguLayer(map: NaverMapInstance) {
+  const response = await fetch(SIGUNGU_GEOJSON_URL)
+
+  if (!response.ok) {
+    throw new Error('Failed to load sigungu GeoJSON.')
+  }
+
+  const geoJson = (await response.json()) as GeoJsonFeatureCollection
+
+  map.data.addGeoJson(geoJson)
+  map.data.setStyle(() => ({
+    clickable: true,
+    fillColor: '#10b981',
+    fillOpacity: 0.08,
+    strokeColor: '#047857',
+    strokeOpacity: 0.7,
+    strokeWeight: 1,
+  }))
+}
 
 function NaverMap() {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -15,7 +40,7 @@ function NaverMap() {
     let isMounted = true
 
     loadNaverMapsScript()
-      .then(() => {
+      .then(async () => {
         if (!isMounted || !window.naver?.maps || !mapElementRef.current) {
           return
         }
@@ -50,6 +75,13 @@ function NaverMap() {
         window.requestAnimationFrame(updateMapSize)
         window.setTimeout(updateMapSize, 100)
 
+        await addSigunguLayer(map)
+
+        if (!isMounted) {
+          return
+        }
+
+        window.requestAnimationFrame(updateMapSize)
         setStatus('ready')
       })
       .catch((error: unknown) => {
@@ -121,7 +153,7 @@ function NaverMap() {
                 지도를 불러오지 못했습니다.
               </p>
               <p className="mt-2 text-sm text-stone-600">
-                Naver Cloud의 Web 서비스 URL과 Client ID를 확인해주세요.
+                Naver Cloud 설정과 행정구역 GeoJSON 파일을 확인해주세요.
               </p>
               {errorMessage ? (
                 <p className="mt-2 text-xs text-stone-500">{errorMessage}</p>
