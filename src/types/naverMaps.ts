@@ -1,5 +1,7 @@
 export type NaverLatLng = object
 
+export type NaverPoint = object
+
 export type NaverSize = object
 
 export type GeoJsonFeatureCollection = {
@@ -10,6 +12,11 @@ export type GeoJsonFeatureCollection = {
 
 export type NaverMapDataFeature = {
   getProperty: (propertyName: string) => unknown
+}
+
+export type NaverMapDataPointerEvent = {
+  coord: NaverLatLng
+  feature: NaverMapDataFeature
 }
 
 export type NaverMapDataStyleOptions = {
@@ -25,6 +32,15 @@ export type NaverMapDataLayer = {
   addGeoJson: (
     geoJson: GeoJsonFeatureCollection,
   ) => NaverMapDataFeature[]
+  addListener: (
+    eventName: string,
+    listener: (event: NaverMapDataPointerEvent) => void,
+  ) => unknown
+  overrideStyle: (
+    feature: NaverMapDataFeature,
+    style: NaverMapDataStyleOptions,
+  ) => void
+  revertStyle: (feature?: NaverMapDataFeature) => void
   setStyle: (
     style:
       | NaverMapDataStyleOptions
@@ -35,6 +51,23 @@ export type NaverMapDataLayer = {
 export type NaverMap = {
   data: NaverMapDataLayer
   setSize: (size: NaverSize) => void
+}
+
+export type NaverInfoWindowOptions = {
+  anchorColor?: string
+  anchorSize?: NaverSize
+  backgroundColor?: string
+  borderColor?: string
+  borderWidth?: number
+  content?: string | HTMLElement
+  maxWidth?: number
+  pixelOffset?: NaverPoint
+}
+
+export type NaverInfoWindow = {
+  close: () => void
+  open: (map: NaverMap, anchor?: NaverLatLng) => void
+  setContent: (content: string | HTMLElement) => void
 }
 
 export type NaverMapOptions = {
@@ -50,11 +83,13 @@ export type NaverMapOptions = {
 
 export type NaverMaps = {
   maps: {
+    InfoWindow: new (options?: NaverInfoWindowOptions) => NaverInfoWindow
     LatLng: new (lat: number, lng: number) => NaverLatLng
     Map: new (
       mapDiv: string | HTMLElement,
       mapOptions?: NaverMapOptions,
     ) => NaverMap
+    Point: new (x: number, y: number) => NaverPoint
     Size: new (width: number, height: number) => NaverSize
     Event: {
       trigger: (target: NaverMap, eventName: string) => void

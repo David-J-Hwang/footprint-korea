@@ -2,19 +2,66 @@ import { useEffect, useRef, useState } from 'react'
 import { loadNaverMapsScript } from '../../../lib/naverMapsLoader'
 import type {
   GeoJsonFeatureCollection,
+  NaverInfoWindow,
   NaverMap as NaverMapInstance,
 } from '../../../types/naverMaps'
 
 const SIGUNGU_GEOJSON_URL = `${import.meta.env.BASE_URL}geojson/TL_SCCO_SIG.json`
+const REGION_CODE_URL = `${import.meta.env.BASE_URL}data/regionCode.json`
 
-async function addSigunguLayer(map: NaverMapInstance) {
-  const response = await fetch(SIGUNGU_GEOJSON_URL)
+type RegionCodeMap = Record<string, string>
 
-  if (!response.ok) {
+function createRegionInfoWindowContent(regionName: string, regionCode: string) {
+  const content = document.createElement('div')
+  content.className = 'w-52 px-4 py-3 text-stone-900'
+
+  const label = document.createElement('p')
+  label.className = 'text-xs font-semibold text-emerald-700'
+  label.textContent = '선택한 행정구역'
+
+  const title = document.createElement('p')
+  title.className = 'mt-1 text-base font-bold text-stone-950'
+  title.textContent = regionName
+
+  const code = document.createElement('p')
+  code.className = 'mt-1 text-xs text-stone-500'
+  code.textContent = `행정구역 코드 ${regionCode}`
+
+  const button = document.createElement('button')
+  button.className =
+    'mt-3 h-9 w-full cursor-pointer rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800'
+  button.textContent = '+ 새 방문지 추가'
+  button.type = 'button'
+  button.addEventListener('click', () => {
+    alert(`${regionName} 새 방문지 추가 버튼을 클릭했습니다!`)
+  })
+
+  content.append(label, title, code, button)
+
+  return content
+}
+
+async function addSigunguLayer(
+  map: NaverMapInstance,
+  regionInfoWindow: NaverInfoWindow,
+) {
+  const [geoJsonResponse, regionCodeResponse] = await Promise.all([
+    fetch(SIGUNGU_GEOJSON_URL),
+    fetch(REGION_CODE_URL),
+  ])
+
+  if (!geoJsonResponse.ok) {
     throw new Error('Failed to load sigungu GeoJSON.')
   }
 
-  const geoJson = (await response.json()) as GeoJsonFeatureCollection
+  if (!regionCodeResponse.ok) {
+    throw new Error('Failed to load region code map.')
+  }
+
+  const [geoJson, regionCodeMap] = (await Promise.all([
+    geoJsonResponse.json(),
+    regionCodeResponse.json(),
+  ])) as [GeoJsonFeatureCollection, RegionCodeMap]
 
   map.data.addGeoJson(geoJson)
   map.data.setStyle(() => ({
@@ -25,6 +72,28 @@ async function addSigunguLayer(map: NaverMapInstance) {
     strokeOpacity: 0.7,
     strokeWeight: 1,
   }))
+
+  map.data.addListener('click', (event) => {
+    const fallbackRegionName = String(
+      event.feature.getProperty('SIG_KOR_NM') ?? '선택한 지역',
+    )
+    const regionCode = String(event.feature.getProperty('SIG_CD') ?? '-')
+    const regionName = regionCodeMap[regionCode] ?? fallbackRegionName
+
+    map.data.revertStyle()
+    map.data.overrideStyle(event.feature, {
+      fillColor: '#059669',
+      fillOpacity: 0.2,
+      strokeColor: '#065f46',
+      strokeOpacity: 1,
+      strokeWeight: 3,
+    })
+
+    regionInfoWindow.setContent(
+      createRegionInfoWindowContent(regionName, regionCode),
+    )
+    regionInfoWindow.open(map, event.coord)
+  })
 }
 
 function NaverMap() {
@@ -57,6 +126,16 @@ function NaverMap() {
         })
         mapRef.current = map
 
+        const regionInfoWindow = new window.naver.maps.InfoWindow({
+          anchorColor: '#ffffff',
+          anchorSize: new window.naver.maps.Size(12, 10),
+          backgroundColor: '#ffffff',
+          borderColor: '#047857',
+          borderWidth: 1,
+          maxWidth: 240,
+          pixelOffset: new window.naver.maps.Point(0, -6),
+        })
+
         function updateMapSize() {
           if (!containerRef.current || !window.naver?.maps) {
             return
@@ -75,7 +154,7 @@ function NaverMap() {
         window.requestAnimationFrame(updateMapSize)
         window.setTimeout(updateMapSize, 100)
 
-        await addSigunguLayer(map)
+        await addSigunguLayer(map, regionInfoWindow)
 
         if (!isMounted) {
           return
@@ -97,6 +176,7 @@ function NaverMap() {
 
     return () => {
       isMounted = false
+      mapRef.current?.data.revertStyle()
       mapRef.current = null
     }
   }, [])
