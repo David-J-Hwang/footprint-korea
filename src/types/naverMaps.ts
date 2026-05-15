@@ -92,6 +92,11 @@ export type NaverMaps = {
     Point: new (x: number, y: number) => NaverPoint
     Size: new (width: number, height: number) => NaverSize
     Event: {
+      addListener: (
+        target: unknown,
+        eventName: string,
+        listener: (...args: unknown[]) => void,
+      ) => unknown
       trigger: (target: NaverMap, eventName: string) => void
     }
     Position: {

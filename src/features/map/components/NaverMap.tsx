@@ -45,6 +45,7 @@ async function addSigunguLayer(
   map: NaverMapInstance,
   regionInfoWindow: NaverInfoWindow,
 ) {
+  let isRegionClick = false
   const [geoJsonResponse, regionCodeResponse] = await Promise.all([
     fetch(SIGUNGU_GEOJSON_URL),
     fetch(REGION_CODE_URL),
@@ -74,6 +75,8 @@ async function addSigunguLayer(
   }))
 
   map.data.addListener('click', (event) => {
+    isRegionClick = true
+
     const fallbackRegionName = String(
       event.feature.getProperty('SIG_KOR_NM') ?? '선택한 지역',
     )
@@ -93,6 +96,20 @@ async function addSigunguLayer(
       createRegionInfoWindowContent(regionName, regionCode),
     )
     regionInfoWindow.open(map, event.coord)
+
+    window.setTimeout(() => {
+      isRegionClick = false
+    }, 0)
+  })
+
+  window.naver?.maps.Event.addListener(map, 'click', () => {
+    if (isRegionClick) {
+      isRegionClick = false
+      return
+    }
+
+    regionInfoWindow.close()
+    map.data.revertStyle()
   })
 }
 
