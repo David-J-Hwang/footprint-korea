@@ -53,7 +53,7 @@ function AppHeader() {
             <span className="break-all">{displayName}</span>님, 환영합니다.
           </p>
           <button
-            className="h-9 shrink-0 rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-not-allowed disabled:bg-white/50 disabled:text-emerald-950/50 sm:h-10 sm:px-4"
+            className="h-9 shrink-0 cursor-pointer rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-not-allowed disabled:bg-white/50 disabled:text-emerald-950/50 sm:h-10 sm:px-4"
             disabled={isSigningOut}
             onClick={handleSignOut}
             type="button"
