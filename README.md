@@ -29,6 +29,7 @@
 
 ## 4. 기타
   - 행정구역 GeoJSON 레이어 참조: https://navermaps.github.io/maps.js.ncp/docs/tutorial-2-datalayer-region.example.html
+  - 행정구역 GeoJSON 데이터: https://oioirang.tistory.com/108
   - 방문지를 등록할 때 사용자는 새 방문지 페이지에서 방문한 곳을 등록하거나, 지도에서 직접 레이아웃을 클릭해 새 방문지 페이지로 넘어갈 수 있도록 한다.
   - 같은 시군구에 여러 번 방문기록을 남길 수는 있지만, 지도에 색은 한 번만 칠한다.
   - Supabase에서는 Row Level Security를 적용한다.

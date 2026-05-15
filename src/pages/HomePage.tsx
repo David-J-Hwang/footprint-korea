@@ -1,13 +1,14 @@
 import AppHeader from '../components/layout/AppHeader'
+import NaverMap from '../features/map/components/NaverMap'
+import VisitListPanel from '../features/visits/components/VisitListPanel'
 
 function HomePage() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-950">
       <AppHeader />
-      <main className="mx-auto w-full max-w-6xl px-5 py-10">
-        <section className="rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold">로그인에 성공했습니다.</h1>
-        </section>
+      <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-6 sm:px-5 lg:grid-cols-[minmax(240px,1fr)_3fr] lg:py-8">
+        <VisitListPanel />
+        <NaverMap />
       </main>
     </div>
   )
