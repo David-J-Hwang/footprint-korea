@@ -1,16 +1,74 @@
 import {
+  BuildingStorefrontIcon,
+  CakeIcon,
+  CameraIcon,
+  GlobeAsiaAustraliaIcon,
+  HomeIcon,
   PencilSquareIcon,
+  ShoppingBagIcon,
+  TagIcon,
   TrashIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline'
+import type {
+  ComponentType,
+  KeyboardEvent,
+  SVGProps,
+} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import type { Visit } from '../visitTypes'
+import type { Visit, VisitCategory } from '../visitTypes'
 import { VISIT_CATEGORY_LABELS } from '../visitTypes'
 
 type VisitListPanelProps = {
   errorMessage?: string
   isLoading?: boolean
   onRequestDeleteVisit?: (visit: Visit) => void
+  onSelectVisit?: (visit: Visit) => void
+  selectedVisitId?: string | null
   visits: Visit[]
+}
+
+type VisitCategoryBadgeConfig = {
+  Icon: ComponentType<SVGProps<SVGSVGElement>>
+  className: string
+}
+
+const VISIT_CATEGORY_BADGE_CONFIG: Record<
+  VisitCategory,
+  VisitCategoryBadgeConfig
+> = {
+  attraction: {
+    Icon: CameraIcon,
+    className: 'bg-teal-50 text-teal-700 ring-teal-200/70',
+  },
+  cafe: {
+    Icon: CakeIcon,
+    className: 'bg-amber-50 text-amber-700 ring-amber-200/70',
+  },
+  nature: {
+    Icon: GlobeAsiaAustraliaIcon,
+    className: 'bg-lime-50 text-lime-700 ring-lime-200/70',
+  },
+  other: {
+    Icon: TagIcon,
+    className: 'bg-stone-100 text-stone-700 ring-stone-200',
+  },
+  restaurant: {
+    Icon: BuildingStorefrontIcon,
+    className: 'bg-orange-50 text-orange-700 ring-orange-200/70',
+  },
+  shopping: {
+    Icon: ShoppingBagIcon,
+    className: 'bg-rose-50 text-rose-700 ring-rose-200/70',
+  },
+  stay: {
+    Icon: HomeIcon,
+    className: 'bg-indigo-50 text-indigo-700 ring-indigo-200/70',
+  },
+  transport: {
+    Icon: TruckIcon,
+    className: 'bg-sky-50 text-sky-700 ring-sky-200/70',
+  },
 }
 
 function formatVisitDateRange(startedOn: string | null, endedOn: string | null) {
@@ -29,10 +87,28 @@ function formatVisitDateRange(startedOn: string | null, endedOn: string | null) 
   return `${startedOn} - ${endedOn}`
 }
 
+function VisitCategoryBadge({ category }: { category: VisitCategory }) {
+  const { Icon, className } = VISIT_CATEGORY_BADGE_CONFIG[category]
+
+  return (
+    <span
+      className={[
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1',
+        className,
+      ].join(' ')}
+    >
+      <Icon aria-hidden="true" className="size-3.5" />
+      {VISIT_CATEGORY_LABELS[category]}
+    </span>
+  )
+}
+
 function VisitListPanel({
   errorMessage,
   isLoading = false,
   onRequestDeleteVisit,
+  onSelectVisit,
+  selectedVisitId,
   visits,
 }: VisitListPanelProps) {
   const navigate = useNavigate()
@@ -41,29 +117,43 @@ function VisitListPanel({
     navigate(`/visits/${visit.id}/edit`)
   }
 
+  function handleVisitCardKeyDown(
+    event: KeyboardEvent<HTMLDivElement>,
+    visit: Visit,
+  ) {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return
+    }
+
+    event.preventDefault()
+    onSelectVisit?.(visit)
+  }
+
   return (
-    <aside className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-emerald-700">방문 기록</p>
-          <h1 className="mt-1 text-2xl font-semibold text-stone-950">
-            방문한 곳
-          </h1>
+    <aside className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm lg:flex lg:h-[calc(100vh-12rem)] lg:min-h-0 lg:flex-col lg:overflow-hidden">
+      <div className="shrink-0">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-emerald-700">방문 기록</p>
+            <h1 className="mt-1 text-2xl font-semibold text-stone-950">
+              방문한 곳
+            </h1>
+          </div>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+            {visits.length}곳
+          </span>
         </div>
-        <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
-          {visits.length}곳
-        </span>
+
+        <Link
+          className="mt-6 flex h-11 w-full cursor-pointer items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-700/20"
+          to="/visits/new"
+        >
+          + 새 방문지 추가
+        </Link>
       </div>
 
-      <Link
-        className="mt-6 flex h-11 w-full cursor-pointer items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-700/20"
-        to="/visits/new"
-      >
-        + 새 방문지 추가
-      </Link>
-
       {errorMessage ? (
-        <p className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+        <p className="mt-6 shrink-0 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
           {errorMessage}
         </p>
       ) : null}
@@ -88,61 +178,72 @@ function VisitListPanel({
       ) : null}
 
       {visits.length > 0 ? (
-        <div className="mt-6 grid gap-3">
-          {visits.map((visit) => (
-            <Link
-              className="block rounded-md border border-stone-200 bg-stone-50 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/40 focus:outline-none focus:ring-4 focus:ring-emerald-700/15"
-              key={visit.id}
-              state={{ visitTitle: visit.title }}
-              to={`/visits/${visit.id}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                      {VISIT_CATEGORY_LABELS[visit.category]}
-                    </span>
-                    <h2 className="min-w-0 text-base font-semibold text-stone-950">
-                      {visit.title}
-                    </h2>
-                  </div>
-                  <p className="mt-1 text-sm text-stone-600">
-                    {visit.region_name}
-                  </p>
-                </div>
+        <div className="mt-6 grid gap-3 lg:min-h-0 lg:flex-1 lg:auto-rows-max lg:overflow-y-auto lg:pr-1">
+          {visits.map((visit) => {
+            const isSelected = selectedVisitId === visit.id
 
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    aria-label={`${visit.title} 수정`}
-                    className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-sky-600 transition hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-700/15"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      handleEditVisitClick(visit)
-                    }}
-                    type="button"
-                  >
-                    <PencilSquareIcon aria-hidden="true" className="size-4" />
-                  </button>
-                  <button
-                    aria-label={`${visit.title} 삭제`}
-                    className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-700/15"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      onRequestDeleteVisit?.(visit)
-                    }}
-                    type="button"
-                  >
-                    <TrashIcon aria-hidden="true" className="size-4" />
-                  </button>
+            return (
+              <div
+                aria-label={`${visit.title} 위치 보기`}
+                aria-pressed={isSelected}
+                className={[
+                  'block cursor-pointer rounded-md border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-emerald-700/15',
+                  isSelected
+                    ? 'border-emerald-300 bg-emerald-50 shadow-sm'
+                    : 'border-stone-200 bg-stone-50 hover:border-emerald-200 hover:bg-emerald-50/40',
+                ].join(' ')}
+                key={visit.id}
+                onClick={() => onSelectVisit?.(visit)}
+                onKeyDown={(event) => handleVisitCardKeyDown(event, visit)}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <VisitCategoryBadge category={visit.category} />
+                      <h2 className="min-w-0 text-base font-semibold text-stone-950">
+                        {visit.title}
+                      </h2>
+                    </div>
+                    <p className="mt-1 text-sm text-stone-600">
+                      {visit.region_name}
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      aria-label={`${visit.title} 수정`}
+                      className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-sky-600 transition hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-700/15"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        handleEditVisitClick(visit)
+                      }}
+                      type="button"
+                    >
+                      <PencilSquareIcon aria-hidden="true" className="size-4" />
+                    </button>
+                    <button
+                      aria-label={`${visit.title} 삭제`}
+                      className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-700/15"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        onRequestDeleteVisit?.(visit)
+                      }}
+                      type="button"
+                    >
+                      <TrashIcon aria-hidden="true" className="size-4" />
+                    </button>
+                  </div>
                 </div>
+                <p className="mt-3 text-sm font-medium text-stone-700">
+                  {formatVisitDateRange(visit.started_on, visit.ended_on)}
+                </p>
               </div>
-              <p className="mt-3 text-sm font-medium text-stone-700">
-                {formatVisitDateRange(visit.started_on, visit.ended_on)}
-              </p>
-            </Link>
-          ))}
+            )
+          })}
         </div>
       ) : null}
     </aside>

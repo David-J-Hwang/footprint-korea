@@ -4,6 +4,7 @@ import AppHeader from '../components/layout/AppHeader'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useAuth } from '../features/auth/useAuth'
 import NaverMap, {
+  type MapViewMode,
   type SelectedRegion,
 } from '../features/map/components/NaverMap'
 import VisitListPanel from '../features/visits/components/VisitListPanel'
@@ -17,6 +18,8 @@ function HomePage() {
   const [isLoadingVisits, setIsLoadingVisits] = useState(true)
   const [visitErrorMessage, setVisitErrorMessage] = useState('')
   const [visitToDelete, setVisitToDelete] = useState<Visit | null>(null)
+  const [mapViewMode, setMapViewMode] = useState<MapViewMode>('regions')
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null)
   const [isDeletingVisit, setIsDeletingVisit] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
 
@@ -27,6 +30,22 @@ function HomePage() {
       })
 
       navigate(`/visits/new?${params.toString()}`)
+    },
+    [navigate],
+  )
+
+  const handleSelectVisit = useCallback((visit: Visit) => {
+    setSelectedVisitId(visit.id)
+    setMapViewMode('points')
+  }, [])
+
+  const handleOpenVisitDetail = useCallback(
+    (visit: Visit) => {
+      navigate(`/visits/${visit.id}`, {
+        state: {
+          visitTitle: visit.title,
+        },
+      })
     },
     [navigate],
   )
@@ -69,6 +88,9 @@ function HomePage() {
 
     setVisits((currentVisits) =>
       currentVisits.filter((visit) => visit.id !== visitToDelete.id),
+    )
+    setSelectedVisitId((currentVisitId) =>
+      currentVisitId === visitToDelete.id ? null : currentVisitId,
     )
     setVisitToDelete(null)
   }
@@ -124,11 +146,18 @@ function HomePage() {
           errorMessage={visitErrorMessage}
           isLoading={isLoadingVisits}
           onRequestDeleteVisit={handleRequestDeleteVisit}
+          onSelectVisit={handleSelectVisit}
+          selectedVisitId={selectedVisitId}
           visits={visits}
         />
         <NaverMap
           onCreateVisit={handleCreateVisitFromRegion}
+          onOpenVisitDetail={handleOpenVisitDetail}
+          onSelectVisit={handleSelectVisit}
+          onViewModeChange={setMapViewMode}
+          selectedVisitId={selectedVisitId}
           visits={visits}
+          viewMode={mapViewMode}
         />
       </main>
       <ConfirmDialog

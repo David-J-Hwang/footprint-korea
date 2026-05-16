@@ -22,7 +22,7 @@ const SIGUNGU_GEOJSON_URL = `${import.meta.env.BASE_URL}geojson/TL_SCCO_SIG.json
 const REGION_CODE_URL = `${import.meta.env.BASE_URL}data/regionCode.json`
 
 type RegionCodeMap = Record<string, string>
-type MapViewMode = 'regions' | 'points'
+export type MapViewMode = 'regions' | 'points'
 
 export type SelectedRegion = {
   code: string
@@ -47,7 +47,12 @@ type BuildingVisitCluster = VisitCluster & {
 
 type NaverMapProps = {
   onCreateVisit?: (region: SelectedRegion) => void
+  onOpenVisitDetail?: (visit: Visit) => void
+  onSelectVisit?: (visit: Visit) => void
+  onViewModeChange?: (viewMode: MapViewMode) => void
+  selectedVisitId?: string | null
   visits?: Visit[]
+  viewMode?: MapViewMode
 }
 
 function hasVisitLocation(visit: Visit): visit is VisitWithLocation {
@@ -259,7 +264,10 @@ function createClusterMarkerIcon(count: number) {
   }
 }
 
-function createVisitMarkerInfoWindowContent(visit: VisitWithLocation) {
+function createVisitMarkerInfoWindowContent(
+  visit: VisitWithLocation,
+  onOpenVisitDetail?: (visit: Visit) => void,
+) {
   const content = document.createElement('div')
   content.className = 'w-52 px-4 py-3 text-stone-900'
 
@@ -277,7 +285,16 @@ function createVisitMarkerInfoWindowContent(visit: VisitWithLocation) {
     VISIT_CATEGORY_LABELS[visit.category]
   }`
 
-  content.append(label, title, meta)
+  const button = document.createElement('button')
+  button.className =
+    'mt-3 h-9 w-full cursor-pointer rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800'
+  button.textContent = '상세보기'
+  button.type = 'button'
+  button.addEventListener('click', () => {
+    onOpenVisitDetail?.(visit)
+  })
+
+  content.append(label, title, meta, button)
 
   return content
 }
@@ -287,6 +304,9 @@ function renderVisitMarkers(
   visits: Visit[],
   visitInfoWindow: NaverInfoWindow,
   markersRef: MutableRefObject<NaverMarker[]>,
+  selectedVisitId?: string | null,
+  onOpenVisitDetail?: (visit: Visit) => void,
+  onSelectVisit?: (visit: Visit) => void,
 ) {
   if (!window.naver?.maps) {
     return
@@ -315,7 +335,10 @@ function renderVisitMarkers(
       })
 
       naverMaps.Event.addListener(marker, 'click', () => {
-        visitInfoWindow.setContent(createVisitMarkerInfoWindowContent(visit))
+        onSelectVisit?.(visit)
+        visitInfoWindow.setContent(
+          createVisitMarkerInfoWindowContent(visit, onOpenVisitDetail),
+        )
         visitInfoWindow.open(map, marker)
       })
 
@@ -338,6 +361,34 @@ function renderVisitMarkers(
 
     markersRef.current.push(marker)
   })
+
+  const selectedVisit = visits.find((visit) => visit.id === selectedVisitId)
+
+  if (!selectedVisit || !hasVisitLocation(selectedVisit)) {
+    return
+  }
+
+  const selectedPosition = new naverMaps.LatLng(
+    selectedVisit.latitude,
+    selectedVisit.longitude,
+  )
+
+  visitInfoWindow.setContent(
+    createVisitMarkerInfoWindowContent(selectedVisit, onOpenVisitDetail),
+  )
+  visitInfoWindow.open(map, selectedPosition)
+}
+
+function focusVisitOnMap(map: NaverMapInstance, visit: VisitWithLocation) {
+  if (!window.naver?.maps) {
+    return
+  }
+
+  map.setCenter(new window.naver.maps.LatLng(visit.latitude, visit.longitude))
+
+  if (map.getZoom() < 13) {
+    map.setZoom(13)
+  }
 }
 
 function createRegionInfoWindowContent(
@@ -466,7 +517,12 @@ function getViewModeButtonClass(isActive: boolean) {
 
 function NaverMap({
   onCreateVisit,
+  onOpenVisitDetail,
+  onSelectVisit,
+  onViewModeChange,
+  selectedVisitId,
   visits = [],
+  viewMode,
 }: NaverMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapElementRef = useRef<HTMLDivElement | null>(null)
@@ -474,8 +530,13 @@ function NaverMap({
   const regionInfoWindowRef = useRef<NaverInfoWindow | null>(null)
   const visitInfoWindowRef = useRef<NaverInfoWindow | null>(null)
   const visitMarkersRef = useRef<NaverMarker[]>([])
-  const [mapViewMode, setMapViewMode] = useState<MapViewMode>('regions')
+  const [internalMapViewMode, setInternalMapViewMode] =
+    useState<MapViewMode>('regions')
+  const mapViewMode = viewMode ?? internalMapViewMode
   const mapViewModeRef = useRef<MapViewMode>(mapViewMode)
+  const onOpenVisitDetailRef = useRef(onOpenVisitDetail)
+  const onSelectVisitRef = useRef(onSelectVisit)
+  const selectedVisitIdRef = useRef(selectedVisitId)
   const visitsRef = useRef(visits)
   const visitedRegionCodeSet = useMemo(
     () => new Set(visits.map((visit) => visit.region_code)),
@@ -487,15 +548,20 @@ function NaverMap({
   )
   const [errorMessage, setErrorMessage] = useState('')
 
-  const handleMapViewModeChange = useCallback((nextMode: MapViewMode) => {
-    setMapViewMode((currentMode) => {
-      if (currentMode === nextMode) {
-        return currentMode
-      }
+  useEffect(() => {
+    onOpenVisitDetailRef.current = onOpenVisitDetail
+    onSelectVisitRef.current = onSelectVisit
+    selectedVisitIdRef.current = selectedVisitId
+  }, [onOpenVisitDetail, onSelectVisit, selectedVisitId])
 
-      return nextMode
-    })
-  }, [])
+  const handleMapViewModeChange = useCallback((nextMode: MapViewMode) => {
+    if (viewMode !== undefined) {
+      onViewModeChange?.(nextMode)
+      return
+    }
+
+    setInternalMapViewMode(nextMode)
+  }, [onViewModeChange, viewMode])
 
   useEffect(() => {
     let isMounted = true
@@ -571,6 +637,9 @@ function NaverMap({
             visitsRef.current,
             visitInfoWindowRef.current,
             visitMarkersRef,
+            selectedVisitIdRef.current,
+            onOpenVisitDetailRef.current,
+            onSelectVisitRef.current,
           )
         })
 
@@ -640,10 +709,33 @@ function NaverMap({
         visits,
         visitInfoWindowRef.current,
         visitMarkersRef,
+        selectedVisitId,
+        onOpenVisitDetail,
+        onSelectVisit,
       )
     }
+  }, [
+    mapViewMode,
+    onOpenVisitDetail,
+    onSelectVisit,
+    selectedVisitId,
+    visitedRegionCodeSet,
+    visits,
+  ])
 
-  }, [mapViewMode, visitedRegionCodeSet, visits])
+  useEffect(() => {
+    if (!selectedVisitId || !mapRef.current) {
+      return
+    }
+
+    const selectedVisit = visits.find((visit) => visit.id === selectedVisitId)
+
+    if (!selectedVisit || !hasVisitLocation(selectedVisit)) {
+      return
+    }
+
+    focusVisitOnMap(mapRef.current, selectedVisit)
+  }, [selectedVisitId, visits])
 
   useEffect(() => {
     if (!containerRef.current) {
