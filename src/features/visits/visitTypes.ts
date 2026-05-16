@@ -3,7 +3,10 @@ export const VISIT_CATEGORIES = [
   { label: '카페', value: 'cafe' },
   { label: '숙소', value: 'stay' },
   { label: '관광지', value: 'attraction' },
+  { label: '자연', value: 'nature' },
+  { label: '교통', value: 'transport' },
   { label: '쇼핑', value: 'shopping' },
+  { label: '기타', value: 'other' },
 ] as const
 
 export type VisitCategory = (typeof VISIT_CATEGORIES)[number]['value']
