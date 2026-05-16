@@ -1,8 +1,6 @@
-function VisitListPanel() {
-  function handleCreateVisitClick() {
-    alert('버튼을 클릭했습니다!')
-  }
+import { Link } from 'react-router-dom'
 
+function VisitListPanel() {
   return (
     <aside className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
@@ -17,13 +15,12 @@ function VisitListPanel() {
         </span>
       </div>
 
-      <button
-        className="mt-6 h-11 w-full cursor-pointer rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-700/20"
-        onClick={handleCreateVisitClick}
-        type="button"
+      <Link
+        className="mt-6 flex h-11 w-full cursor-pointer items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-700/20"
+        to="/visits/new"
       >
         + 새 방문지 추가
-      </button>
+      </Link>
 
       <div className="mt-6 rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center">
         <p className="text-sm font-semibold text-stone-800">

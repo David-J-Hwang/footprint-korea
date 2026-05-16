@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
+import NewVisitPage from '../pages/NewVisitPage'
 import ProtectedRoute from './ProtectedRoute'
 import PublicOnlyRoute from './PublicOnlyRoute'
 
@@ -9,6 +10,7 @@ function AppRoutes() {
     <Routes>
       <Route element={<ProtectedRoute />}>
         <Route element={<HomePage />} path="/" />
+        <Route element={<NewVisitPage />} path="/visits/new" />
       </Route>
       <Route element={<PublicOnlyRoute />}>
         <Route element={<LoginPage />} path="/login" />

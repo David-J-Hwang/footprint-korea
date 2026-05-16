@@ -11,7 +11,20 @@ const REGION_CODE_URL = `${import.meta.env.BASE_URL}data/regionCode.json`
 
 type RegionCodeMap = Record<string, string>
 
-function createRegionInfoWindowContent(regionName: string, regionCode: string) {
+export type SelectedRegion = {
+  code: string
+  name: string
+}
+
+type NaverMapProps = {
+  onCreateVisit?: (region: SelectedRegion) => void
+}
+
+function createRegionInfoWindowContent(
+  regionName: string,
+  regionCode: string,
+  onCreateVisit?: (region: SelectedRegion) => void,
+) {
   const content = document.createElement('div')
   content.className = 'w-52 px-4 py-3 text-stone-900'
 
@@ -33,7 +46,10 @@ function createRegionInfoWindowContent(regionName: string, regionCode: string) {
   button.textContent = '+ 새 방문지 추가'
   button.type = 'button'
   button.addEventListener('click', () => {
-    alert(`${regionName} 새 방문지 추가 버튼을 클릭했습니다!`)
+    onCreateVisit?.({
+      code: regionCode,
+      name: regionName,
+    })
   })
 
   content.append(label, title, code, button)
@@ -44,6 +60,7 @@ function createRegionInfoWindowContent(regionName: string, regionCode: string) {
 async function addSigunguLayer(
   map: NaverMapInstance,
   regionInfoWindow: NaverInfoWindow,
+  onCreateVisit?: (region: SelectedRegion) => void,
 ) {
   let isRegionClick = false
   const [geoJsonResponse, regionCodeResponse] = await Promise.all([
@@ -93,7 +110,7 @@ async function addSigunguLayer(
     })
 
     regionInfoWindow.setContent(
-      createRegionInfoWindowContent(regionName, regionCode),
+      createRegionInfoWindowContent(regionName, regionCode, onCreateVisit),
     )
     regionInfoWindow.open(map, event.coord)
 
@@ -113,7 +130,7 @@ async function addSigunguLayer(
   })
 }
 
-function NaverMap() {
+function NaverMap({ onCreateVisit }: NaverMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapElementRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<NaverMapInstance | null>(null)
@@ -171,7 +188,7 @@ function NaverMap() {
         window.requestAnimationFrame(updateMapSize)
         window.setTimeout(updateMapSize, 100)
 
-        await addSigunguLayer(map, regionInfoWindow)
+        await addSigunguLayer(map, regionInfoWindow, onCreateVisit)
 
         if (!isMounted) {
           return
@@ -196,7 +213,7 @@ function NaverMap() {
       mapRef.current?.data.revertStyle()
       mapRef.current = null
     }
-  }, [])
+  }, [onCreateVisit])
 
   useEffect(() => {
     if (!containerRef.current) {
