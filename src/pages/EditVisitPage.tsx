@@ -212,11 +212,7 @@ function EditVisitPage() {
       return
     }
 
-    navigate(`/visits/${visitId}`, {
-      state: {
-        visitTitle: trimmedTitle,
-      },
-    })
+    navigate('/', { replace: true })
   }
 
   return (

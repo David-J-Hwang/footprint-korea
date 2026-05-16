@@ -9,8 +9,8 @@ import AppHeader from '../components/layout/AppHeader'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useAuth } from '../features/auth/useAuth'
 import VisitPointMap from '../features/map/components/VisitPointMap'
+import VisitCategoryBadge from '../features/visits/components/VisitCategoryBadge'
 import type { Visit } from '../features/visits/visitTypes'
-import { VISIT_CATEGORY_LABELS } from '../features/visits/visitTypes'
 import { supabase } from '../lib/supabaseClient'
 
 type VisitDetailLocationState = {
@@ -175,14 +175,11 @@ function VisitDetailPage() {
 
                   <div>
                     <p className="text-sm font-semibold text-stone-800">
-                      방문 유형
+                      방문지 유형
                     </p>
-                    <p className="mt-2">
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                        {VISIT_CATEGORY_LABELS[visit.category] ??
-                          visit.category}
-                      </span>
-                    </p>
+                    <div className="mt-2">
+                      <VisitCategoryBadge category={visit.category} />
+                    </div>
                   </div>
 
                   <div>
