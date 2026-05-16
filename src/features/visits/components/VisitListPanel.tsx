@@ -90,9 +90,11 @@ function VisitListPanel({
       {visits.length > 0 ? (
         <div className="mt-6 grid gap-3">
           {visits.map((visit) => (
-            <article
-              className="rounded-md border border-stone-200 bg-stone-50 p-4"
+            <Link
+              className="block rounded-md border border-stone-200 bg-stone-50 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/40 focus:outline-none focus:ring-4 focus:ring-emerald-700/15"
               key={visit.id}
+              state={{ visitTitle: visit.title }}
+              to={`/visits/${visit.id}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -113,7 +115,10 @@ function VisitListPanel({
                   <button
                     aria-label={`${visit.title} 수정`}
                     className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-sky-600 transition hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-700/15"
-                    onClick={() => handleEditVisitClick(visit)}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      handleEditVisitClick(visit)
+                    }}
                     type="button"
                   >
                     <PencilSquareIcon aria-hidden="true" className="size-4" />
@@ -121,7 +126,10 @@ function VisitListPanel({
                   <button
                     aria-label={`${visit.title} 삭제`}
                     className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-700/15"
-                    onClick={() => handleDeleteVisitClick(visit)}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      handleDeleteVisitClick(visit)
+                    }}
                     type="button"
                   >
                     <TrashIcon aria-hidden="true" className="size-4" />
@@ -131,7 +139,7 @@ function VisitListPanel({
               <p className="mt-3 text-sm font-medium text-stone-700">
                 {formatVisitDateRange(visit.started_on, visit.ended_on)}
               </p>
-            </article>
+            </Link>
           ))}
         </div>
       ) : null}
