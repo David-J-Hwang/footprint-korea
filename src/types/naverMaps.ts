@@ -60,6 +60,7 @@ export type NaverMapDataLayer = {
 export type NaverMap = {
   data: NaverMapDataLayer
   fitBounds: (bounds: NaverLatLngBounds) => void
+  getZoom: () => number
   setCenter: (center: NaverLatLng) => void
   setSize: (size: NaverSize) => void
   setZoom: (zoom: number) => void
@@ -94,9 +95,15 @@ export type NaverMapOptions = {
 }
 
 export type NaverMarkerOptions = {
+  icon?: {
+    anchor?: NaverPoint
+    content: string
+    size?: NaverSize
+  }
   map?: NaverMap
   position: NaverLatLng
   title?: string
+  zIndex?: number
 }
 
 export type NaverMaps = {

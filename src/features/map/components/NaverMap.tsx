@@ -1,30 +1,80 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react'
 import { loadNaverMapsScript } from '../../../lib/naverMapsLoader'
 import type {
   GeoJsonFeatureCollection,
   NaverInfoWindow,
   NaverMap as NaverMapInstance,
+  NaverMarker,
 } from '../../../types/naverMaps'
+import {
+  VISIT_CATEGORY_LABELS,
+  type Visit,
+} from '../../visits/visitTypes'
 
 const SIGUNGU_GEOJSON_URL = `${import.meta.env.BASE_URL}geojson/TL_SCCO_SIG.json`
 const REGION_CODE_URL = `${import.meta.env.BASE_URL}data/regionCode.json`
 
 type RegionCodeMap = Record<string, string>
+type MapViewMode = 'regions' | 'points'
 
 export type SelectedRegion = {
   code: string
   name: string
 }
 
+type VisitWithLocation = Visit & {
+  latitude: number
+  longitude: number
+}
+
+type VisitCluster = {
+  centerLat: number
+  centerLng: number
+  visits: VisitWithLocation[]
+}
+
+type BuildingVisitCluster = VisitCluster & {
+  totalLat: number
+  totalLng: number
+}
+
 type NaverMapProps = {
   onCreateVisit?: (region: SelectedRegion) => void
-  visitedRegionCodes?: string[]
+  visits?: Visit[]
+}
+
+function hasVisitLocation(visit: Visit): visit is VisitWithLocation {
+  return (
+    typeof visit.latitude === 'number' &&
+    typeof visit.longitude === 'number' &&
+    Number.isFinite(visit.latitude) &&
+    Number.isFinite(visit.longitude)
+  )
 }
 
 function getSigunguLayerStyle(
   featureRegionCode: unknown,
   visitedRegionCodeSet: Set<string>,
+  mapViewMode: MapViewMode,
 ) {
+  if (mapViewMode === 'points') {
+    return {
+      clickable: false,
+      fillColor: '#10b981',
+      fillOpacity: 0,
+      strokeColor: '#10b981',
+      strokeOpacity: 0,
+      strokeWeight: 1,
+    }
+  }
+
   const isVisited = visitedRegionCodeSet.has(String(featureRegionCode))
 
   return {
@@ -40,13 +90,254 @@ function getSigunguLayerStyle(
 function applySigunguLayerStyle(
   map: NaverMapInstance,
   visitedRegionCodeSet: Set<string>,
+  mapViewMode: MapViewMode,
 ) {
   map.data.setStyle((feature) =>
     getSigunguLayerStyle(
       feature.getProperty('SIG_CD'),
       visitedRegionCodeSet,
+      mapViewMode,
     ),
   )
+}
+
+function degreesToRadians(degrees: number) {
+  return (degrees * Math.PI) / 180
+}
+
+function getDistanceKilometers(
+  firstVisit: VisitWithLocation,
+  secondVisit: Pick<VisitWithLocation, 'latitude' | 'longitude'>,
+) {
+  const earthRadiusKilometers = 6371
+  const latitudeDistance = degreesToRadians(
+    secondVisit.latitude - firstVisit.latitude,
+  )
+  const longitudeDistance = degreesToRadians(
+    secondVisit.longitude - firstVisit.longitude,
+  )
+  const firstLatitude = degreesToRadians(firstVisit.latitude)
+  const secondLatitude = degreesToRadians(secondVisit.latitude)
+
+  const haversine =
+    Math.sin(latitudeDistance / 2) ** 2 +
+    Math.cos(firstLatitude) *
+      Math.cos(secondLatitude) *
+      Math.sin(longitudeDistance / 2) ** 2
+
+  return (
+    2 *
+    earthRadiusKilometers *
+    Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine))
+  )
+}
+
+function getClusterRadiusKilometers(zoom: number) {
+  if (zoom <= 6) {
+    return 130
+  }
+
+  if (zoom === 7) {
+    return 90
+  }
+
+  if (zoom === 8) {
+    return 55
+  }
+
+  if (zoom === 9) {
+    return 32
+  }
+
+  if (zoom === 10) {
+    return 9
+  }
+
+  if (zoom === 11) {
+    return 5
+  }
+
+  if (zoom === 12) {
+    return 5
+  }
+
+  if (zoom === 13) {
+    return 2.5
+  }
+
+  return 1
+}
+
+function createVisitClusters(visits: Visit[], zoom: number) {
+  const clusterRadiusKilometers = getClusterRadiusKilometers(zoom)
+  const clusters: BuildingVisitCluster[] = []
+
+  visits.filter(hasVisitLocation).forEach((visit) => {
+    let nearestClusterIndex = -1
+    let nearestDistance = Number.POSITIVE_INFINITY
+
+    clusters.forEach((cluster, index) => {
+      const distance = getDistanceKilometers(visit, {
+        latitude: cluster.centerLat,
+        longitude: cluster.centerLng,
+      })
+
+      if (distance <= clusterRadiusKilometers && distance < nearestDistance) {
+        nearestClusterIndex = index
+        nearestDistance = distance
+      }
+    })
+
+    if (nearestClusterIndex < 0) {
+      clusters.push({
+        centerLat: visit.latitude,
+        centerLng: visit.longitude,
+        totalLat: visit.latitude,
+        totalLng: visit.longitude,
+        visits: [visit],
+      })
+      return
+    }
+
+    const nearestCluster = clusters[nearestClusterIndex]
+
+    nearestCluster.visits.push(visit)
+    nearestCluster.totalLat += visit.latitude
+    nearestCluster.totalLng += visit.longitude
+    nearestCluster.centerLat =
+      nearestCluster.totalLat / nearestCluster.visits.length
+    nearestCluster.centerLng =
+      nearestCluster.totalLng / nearestCluster.visits.length
+  })
+
+  return clusters.map<VisitCluster>(({ centerLat, centerLng, visits }) => ({
+    centerLat,
+    centerLng,
+    visits,
+  }))
+}
+
+function clearVisitMarkers(markers: NaverMarker[]) {
+  markers.forEach((marker) => {
+    marker.setMap(null)
+  })
+}
+
+function createClusterMarkerIcon(count: number) {
+  if (!window.naver?.maps) {
+    return undefined
+  }
+
+  const diameter = count >= 10 ? 46 : 42
+
+  return {
+    anchor: new window.naver.maps.Point(diameter / 2, diameter / 2),
+    content: `
+      <div
+        aria-label="${count}개의 방문 위치"
+        style="
+          align-items: center;
+          background: #047857;
+          border: 3px solid rgba(255, 255, 255, 0.92);
+          border-radius: 9999px;
+          box-shadow: 0 10px 20px rgba(4, 120, 87, 0.26);
+          color: #ffffff;
+          cursor: pointer;
+          display: flex;
+          font-size: 14px;
+          font-weight: 800;
+          height: ${diameter}px;
+          justify-content: center;
+          line-height: 1;
+          width: ${diameter}px;
+        "
+      >
+        ${count}
+      </div>
+    `,
+    size: new window.naver.maps.Size(diameter, diameter),
+  }
+}
+
+function createVisitMarkerInfoWindowContent(visit: VisitWithLocation) {
+  const content = document.createElement('div')
+  content.className = 'w-52 px-4 py-3 text-stone-900'
+
+  const label = document.createElement('p')
+  label.className = 'text-xs font-semibold text-emerald-700'
+  label.textContent = '방문 위치'
+
+  const title = document.createElement('p')
+  title.className = 'mt-1 text-base font-bold text-stone-950'
+  title.textContent = visit.title
+
+  const meta = document.createElement('p')
+  meta.className = 'mt-1 text-xs text-stone-500'
+  meta.textContent = `${visit.region_name} · ${
+    VISIT_CATEGORY_LABELS[visit.category]
+  }`
+
+  content.append(label, title, meta)
+
+  return content
+}
+
+function renderVisitMarkers(
+  map: NaverMapInstance,
+  visits: Visit[],
+  visitInfoWindow: NaverInfoWindow,
+  markersRef: MutableRefObject<NaverMarker[]>,
+) {
+  if (!window.naver?.maps) {
+    return
+  }
+
+  const naverMaps = window.naver.maps
+
+  clearVisitMarkers(markersRef.current)
+  markersRef.current = []
+  visitInfoWindow.close()
+
+  const clusters = createVisitClusters(visits, map.getZoom())
+
+  clusters.forEach((cluster) => {
+    const position = new naverMaps.LatLng(
+      cluster.centerLat,
+      cluster.centerLng,
+    )
+
+    if (cluster.visits.length === 1) {
+      const [visit] = cluster.visits
+      const marker = new naverMaps.Marker({
+        map,
+        position,
+        title: visit.title,
+      })
+
+      naverMaps.Event.addListener(marker, 'click', () => {
+        visitInfoWindow.setContent(createVisitMarkerInfoWindowContent(visit))
+        visitInfoWindow.open(map, marker)
+      })
+
+      markersRef.current.push(marker)
+      return
+    }
+
+    const marker = new naverMaps.Marker({
+      icon: createClusterMarkerIcon(cluster.visits.length),
+      map,
+      position,
+      title: `${cluster.visits.length}개의 방문 위치`,
+      zIndex: 100 + cluster.visits.length,
+    })
+
+    naverMaps.Event.addListener(marker, 'click', () => {
+      map.setCenter(position)
+      map.setZoom(Math.min(map.getZoom() + 2, 16))
+    })
+
+    markersRef.current.push(marker)
+  })
 }
 
 function createRegionInfoWindowContent(
@@ -90,6 +381,8 @@ async function addSigunguLayer(
   map: NaverMapInstance,
   regionInfoWindow: NaverInfoWindow,
   getVisitedRegionCodeSet: () => Set<string>,
+  getMapViewMode: () => MapViewMode,
+  onMapBlankClick: () => void,
   onCreateVisit?: (region: SelectedRegion) => void,
 ) {
   let isRegionClick = false
@@ -112,9 +405,17 @@ async function addSigunguLayer(
   ])) as [GeoJsonFeatureCollection, RegionCodeMap]
 
   map.data.addGeoJson(geoJson)
-  applySigunguLayerStyle(map, getVisitedRegionCodeSet())
+  applySigunguLayerStyle(
+    map,
+    getVisitedRegionCodeSet(),
+    getMapViewMode(),
+  )
 
   map.data.addListener('click', (event) => {
+    if (getMapViewMode() !== 'regions') {
+      return
+    }
+
     isRegionClick = true
 
     const fallbackRegionName = String(
@@ -150,25 +451,51 @@ async function addSigunguLayer(
 
     regionInfoWindow.close()
     map.data.revertStyle()
+    onMapBlankClick()
   })
+}
+
+function getViewModeButtonClass(isActive: boolean) {
+  return [
+    'h-9 cursor-pointer px-3 text-sm font-semibold transition sm:px-4',
+    isActive
+      ? 'bg-emerald-700 text-white'
+      : 'bg-white text-stone-700 hover:bg-emerald-50',
+  ].join(' ')
 }
 
 function NaverMap({
   onCreateVisit,
-  visitedRegionCodes = [],
+  visits = [],
 }: NaverMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapElementRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<NaverMapInstance | null>(null)
+  const regionInfoWindowRef = useRef<NaverInfoWindow | null>(null)
+  const visitInfoWindowRef = useRef<NaverInfoWindow | null>(null)
+  const visitMarkersRef = useRef<NaverMarker[]>([])
+  const [mapViewMode, setMapViewMode] = useState<MapViewMode>('regions')
+  const mapViewModeRef = useRef<MapViewMode>(mapViewMode)
+  const visitsRef = useRef(visits)
   const visitedRegionCodeSet = useMemo(
-    () => new Set(visitedRegionCodes),
-    [visitedRegionCodes],
+    () => new Set(visits.map((visit) => visit.region_code)),
+    [visits],
   )
   const visitedRegionCodeSetRef = useRef(visitedRegionCodeSet)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
     'loading',
   )
   const [errorMessage, setErrorMessage] = useState('')
+
+  const handleMapViewModeChange = useCallback((nextMode: MapViewMode) => {
+    setMapViewMode((currentMode) => {
+      if (currentMode === nextMode) {
+        return currentMode
+      }
+
+      return nextMode
+    })
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -200,6 +527,18 @@ function NaverMap({
           maxWidth: 240,
           pixelOffset: new window.naver.maps.Point(0, -6),
         })
+        regionInfoWindowRef.current = regionInfoWindow
+
+        const visitInfoWindow = new window.naver.maps.InfoWindow({
+          anchorColor: '#ffffff',
+          anchorSize: new window.naver.maps.Size(12, 10),
+          backgroundColor: '#ffffff',
+          borderColor: '#047857',
+          borderWidth: 1,
+          maxWidth: 240,
+          pixelOffset: new window.naver.maps.Point(0, -6),
+        })
+        visitInfoWindowRef.current = visitInfoWindow
 
         function updateMapSize() {
           if (!containerRef.current || !window.naver?.maps) {
@@ -219,10 +558,28 @@ function NaverMap({
         window.requestAnimationFrame(updateMapSize)
         window.setTimeout(updateMapSize, 100)
 
+        window.naver.maps.Event.addListener(map, 'idle', () => {
+          if (
+            mapViewModeRef.current !== 'points' ||
+            !visitInfoWindowRef.current
+          ) {
+            return
+          }
+
+          renderVisitMarkers(
+            map,
+            visitsRef.current,
+            visitInfoWindowRef.current,
+            visitMarkersRef,
+          )
+        })
+
         await addSigunguLayer(
           map,
           regionInfoWindow,
           () => visitedRegionCodeSetRef.current,
+          () => mapViewModeRef.current,
+          () => visitInfoWindow.close(),
           onCreateVisit,
         )
 
@@ -246,6 +603,10 @@ function NaverMap({
 
     return () => {
       isMounted = false
+      clearVisitMarkers(visitMarkersRef.current)
+      visitMarkersRef.current = []
+      regionInfoWindowRef.current?.close()
+      visitInfoWindowRef.current?.close()
       mapRef.current?.data.revertStyle()
       mapRef.current = null
     }
@@ -253,13 +614,36 @@ function NaverMap({
 
   useEffect(() => {
     visitedRegionCodeSetRef.current = visitedRegionCodeSet
+    visitsRef.current = visits
+    mapViewModeRef.current = mapViewMode
 
     if (!mapRef.current) {
       return
     }
 
-    applySigunguLayerStyle(mapRef.current, visitedRegionCodeSet)
-  }, [visitedRegionCodeSet])
+    const map = mapRef.current
+    map.data.revertStyle()
+    applySigunguLayerStyle(map, visitedRegionCodeSet, mapViewMode)
+
+    if (mapViewMode === 'regions') {
+      visitInfoWindowRef.current?.close()
+      clearVisitMarkers(visitMarkersRef.current)
+      visitMarkersRef.current = []
+      return
+    }
+
+    regionInfoWindowRef.current?.close()
+
+    if (visitInfoWindowRef.current) {
+      renderVisitMarkers(
+        map,
+        visits,
+        visitInfoWindowRef.current,
+        visitMarkersRef,
+      )
+    }
+
+  }, [mapViewMode, visitedRegionCodeSet, visits])
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -293,6 +677,25 @@ function NaverMap({
       className="relative h-[420px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm lg:h-[calc(100vh-12rem)]"
       ref={containerRef}
     >
+      <div className="absolute left-3 top-3 z-10 inline-flex overflow-hidden rounded-md border border-white/80 bg-white shadow-md">
+        <button
+          className={getViewModeButtonClass(mapViewMode === 'regions')}
+          disabled={status !== 'ready'}
+          onClick={() => handleMapViewModeChange('regions')}
+          type="button"
+        >
+          행정구역
+        </button>
+        <button
+          className={getViewModeButtonClass(mapViewMode === 'points')}
+          disabled={status !== 'ready'}
+          onClick={() => handleMapViewModeChange('points')}
+          type="button"
+        >
+          상세위치
+        </button>
+      </div>
+
       <div
         ref={mapElementRef}
         style={{

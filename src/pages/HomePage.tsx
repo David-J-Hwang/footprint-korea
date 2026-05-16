@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
@@ -19,11 +19,6 @@ function HomePage() {
   const [visitToDelete, setVisitToDelete] = useState<Visit | null>(null)
   const [isDeletingVisit, setIsDeletingVisit] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
-
-  const visitedRegionCodes = useMemo(
-    () => Array.from(new Set(visits.map((visit) => visit.region_code))),
-    [visits],
-  )
 
   const handleCreateVisitFromRegion = useCallback(
     (region: SelectedRegion) => {
@@ -133,7 +128,7 @@ function HomePage() {
         />
         <NaverMap
           onCreateVisit={handleCreateVisitFromRegion}
-          visitedRegionCodes={visitedRegionCodes}
+          visits={visits}
         />
       </main>
       <ConfirmDialog
