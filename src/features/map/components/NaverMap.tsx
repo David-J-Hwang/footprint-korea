@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadNaverMapsScript } from '../../../lib/naverMapsLoader'
 import type {
   GeoJsonFeatureCollection,
@@ -18,6 +18,35 @@ export type SelectedRegion = {
 
 type NaverMapProps = {
   onCreateVisit?: (region: SelectedRegion) => void
+  visitedRegionCodes?: string[]
+}
+
+function getSigunguLayerStyle(
+  featureRegionCode: unknown,
+  visitedRegionCodeSet: Set<string>,
+) {
+  const isVisited = visitedRegionCodeSet.has(String(featureRegionCode))
+
+  return {
+    clickable: true,
+    fillColor: isVisited ? '#22c55e' : '#10b981',
+    fillOpacity: isVisited ? 0.4 : 0.08,
+    strokeColor: isVisited ? '#16a34a' : '#047857',
+    strokeOpacity: isVisited ? 0.95 : 0.7,
+    strokeWeight: isVisited ? 2 : 1,
+  }
+}
+
+function applySigunguLayerStyle(
+  map: NaverMapInstance,
+  visitedRegionCodeSet: Set<string>,
+) {
+  map.data.setStyle((feature) =>
+    getSigunguLayerStyle(
+      feature.getProperty('SIG_CD'),
+      visitedRegionCodeSet,
+    ),
+  )
 }
 
 function createRegionInfoWindowContent(
@@ -60,6 +89,7 @@ function createRegionInfoWindowContent(
 async function addSigunguLayer(
   map: NaverMapInstance,
   regionInfoWindow: NaverInfoWindow,
+  getVisitedRegionCodeSet: () => Set<string>,
   onCreateVisit?: (region: SelectedRegion) => void,
 ) {
   let isRegionClick = false
@@ -82,14 +112,7 @@ async function addSigunguLayer(
   ])) as [GeoJsonFeatureCollection, RegionCodeMap]
 
   map.data.addGeoJson(geoJson)
-  map.data.setStyle(() => ({
-    clickable: true,
-    fillColor: '#10b981',
-    fillOpacity: 0.08,
-    strokeColor: '#047857',
-    strokeOpacity: 0.7,
-    strokeWeight: 1,
-  }))
+  applySigunguLayerStyle(map, getVisitedRegionCodeSet())
 
   map.data.addListener('click', (event) => {
     isRegionClick = true
@@ -130,10 +153,18 @@ async function addSigunguLayer(
   })
 }
 
-function NaverMap({ onCreateVisit }: NaverMapProps) {
+function NaverMap({
+  onCreateVisit,
+  visitedRegionCodes = [],
+}: NaverMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapElementRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<NaverMapInstance | null>(null)
+  const visitedRegionCodeSet = useMemo(
+    () => new Set(visitedRegionCodes),
+    [visitedRegionCodes],
+  )
+  const visitedRegionCodeSetRef = useRef(visitedRegionCodeSet)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
     'loading',
   )
@@ -188,7 +219,12 @@ function NaverMap({ onCreateVisit }: NaverMapProps) {
         window.requestAnimationFrame(updateMapSize)
         window.setTimeout(updateMapSize, 100)
 
-        await addSigunguLayer(map, regionInfoWindow, onCreateVisit)
+        await addSigunguLayer(
+          map,
+          regionInfoWindow,
+          () => visitedRegionCodeSetRef.current,
+          onCreateVisit,
+        )
 
         if (!isMounted) {
           return
@@ -214,6 +250,16 @@ function NaverMap({ onCreateVisit }: NaverMapProps) {
       mapRef.current = null
     }
   }, [onCreateVisit])
+
+  useEffect(() => {
+    visitedRegionCodeSetRef.current = visitedRegionCodeSet
+
+    if (!mapRef.current) {
+      return
+    }
+
+    applySigunguLayerStyle(mapRef.current, visitedRegionCodeSet)
+  }, [visitedRegionCodeSet])
 
   useEffect(() => {
     if (!containerRef.current) {
