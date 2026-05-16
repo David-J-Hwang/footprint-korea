@@ -16,6 +16,7 @@ export type SelectedVisitLocation = {
 
 type VisitLocationMapProps = {
   onSelectLocation?: (location: SelectedVisitLocation) => void
+  selectedLocation?: SelectedVisitLocation | null
   selectedRegionCode?: string
 }
 
@@ -158,8 +159,39 @@ function createSelectedLocationInfoWindowContent(
   return content
 }
 
+function updateSelectedMarker(
+  map: NaverMapInstance,
+  markerInfoWindow: NaverInfoWindow | null,
+  currentMarker: NaverMarker | null,
+  location: SelectedVisitLocation,
+) {
+  if (!window.naver?.maps) {
+    return null
+  }
+
+  currentMarker?.setMap(null)
+
+  const position = new window.naver.maps.LatLng(
+    location.latitude,
+    location.longitude,
+  )
+  const marker = new window.naver.maps.Marker({
+    map,
+    position,
+    title: '선택한 위치',
+  })
+
+  markerInfoWindow?.setContent(createSelectedLocationInfoWindowContent(location))
+  markerInfoWindow?.open(map, marker)
+  map.setCenter(position)
+  map.setZoom(15)
+
+  return marker
+}
+
 function VisitLocationMap({
   onSelectLocation,
+  selectedLocation,
   selectedRegionCode,
 }: VisitLocationMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -231,22 +263,16 @@ function VisitLocationMap({
             return
           }
 
-          markerInfoWindowRef.current?.close()
-          selectedMarkerRef.current?.setMap(null)
-          selectedMarkerRef.current = new window.naver.maps.Marker({
-            map,
-            position: coord,
-            title: '선택한 위치',
-          })
           const location = toSelectedLocation(coord)
 
+          selectedMarkerRef.current = updateSelectedMarker(
+            map,
+            markerInfoWindowRef.current,
+            selectedMarkerRef.current,
+            location,
+          )
           onSelectLocationRef.current?.(location)
           setLocationSelectMessage('선택한 위치의 좌표가 양식에 입력되었습니다.')
-
-          markerInfoWindowRef.current?.setContent(
-            createSelectedLocationInfoWindowContent(location),
-          )
-          markerInfoWindowRef.current?.open(map, selectedMarkerRef.current)
         })
 
         window.requestAnimationFrame(updateMapSize)
@@ -272,6 +298,20 @@ function VisitLocationMap({
       mapRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    if (status !== 'ready' || !mapRef.current || !selectedLocation) {
+      return
+    }
+
+    selectedMarkerRef.current = updateSelectedMarker(
+      mapRef.current,
+      markerInfoWindowRef.current,
+      selectedMarkerRef.current,
+      selectedLocation,
+    )
+    setLocationSelectMessage('선택한 위치의 좌표가 양식에 입력되었습니다.')
+  }, [selectedLocation, status])
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -301,7 +341,7 @@ function VisitLocationMap({
   }, [])
 
   useEffect(() => {
-    if (status !== 'ready' || !mapRef.current) {
+    if (status !== 'ready' || !mapRef.current || selectedLocation) {
       return
     }
 
@@ -350,7 +390,7 @@ function VisitLocationMap({
     return () => {
       isMounted = false
     }
-  }, [selectedRegionCode, status])
+  }, [selectedLocation, selectedRegionCode, status])
 
   return (
     <section className="min-w-0">

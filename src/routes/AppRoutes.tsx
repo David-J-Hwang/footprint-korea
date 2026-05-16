@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import EditVisitPage from '../pages/EditVisitPage'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import NewVisitPage from '../pages/NewVisitPage'
@@ -12,6 +13,7 @@ function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<HomePage />} path="/" />
         <Route element={<NewVisitPage />} path="/visits/new" />
+        <Route element={<EditVisitPage />} path="/visits/:visitId/edit" />
         <Route element={<VisitDetailPage />} path="/visits/:visitId" />
       </Route>
       <Route element={<PublicOnlyRoute />}>

@@ -2,13 +2,14 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Visit } from '../visitTypes'
 import { VISIT_CATEGORY_LABELS } from '../visitTypes'
 
 type VisitListPanelProps = {
   errorMessage?: string
   isLoading?: boolean
+  onRequestDeleteVisit?: (visit: Visit) => void
   visits: Visit[]
 }
 
@@ -28,19 +29,18 @@ function formatVisitDateRange(startedOn: string | null, endedOn: string | null) 
   return `${startedOn} - ${endedOn}`
 }
 
-function handleEditVisitClick(visit: Visit) {
-  alert(`${visit.title} 수정 버튼을 클릭했습니다!`)
-}
-
-function handleDeleteVisitClick(visit: Visit) {
-  alert(`${visit.title} 삭제 버튼을 클릭했습니다!`)
-}
-
 function VisitListPanel({
   errorMessage,
   isLoading = false,
+  onRequestDeleteVisit,
   visits,
 }: VisitListPanelProps) {
+  const navigate = useNavigate()
+
+  function handleEditVisitClick(visit: Visit) {
+    navigate(`/visits/${visit.id}/edit`)
+  }
+
   return (
     <aside className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
@@ -117,6 +117,7 @@ function VisitListPanel({
                     className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-sky-600 transition hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-700/15"
                     onClick={(event) => {
                       event.preventDefault()
+                      event.stopPropagation()
                       handleEditVisitClick(visit)
                     }}
                     type="button"
@@ -128,7 +129,8 @@ function VisitListPanel({
                     className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-700/15"
                     onClick={(event) => {
                       event.preventDefault()
-                      handleDeleteVisitClick(visit)
+                      event.stopPropagation()
+                      onRequestDeleteVisit?.(visit)
                     }}
                     type="button"
                   >

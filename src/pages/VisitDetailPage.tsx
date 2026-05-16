@@ -4,8 +4,9 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useAuth } from '../features/auth/useAuth'
 import VisitPointMap from '../features/map/components/VisitPointMap'
 import type { Visit } from '../features/visits/visitTypes'
@@ -32,23 +33,19 @@ function formatVisitDateRange(startedOn: string | null, endedOn: string | null) 
   return `${startedOn} - ${endedOn}`
 }
 
-function handleEditVisitClick(visit: Visit) {
-  alert(`${visit.title} 수정 버튼을 클릭했습니다!`)
-}
-
-function handleDeleteVisitClick(visit: Visit) {
-  alert(`${visit.title} 삭제 버튼을 클릭했습니다!`)
-}
-
 function VisitDetailPage() {
   const { user } = useAuth()
   const { visitId } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const locationState = location.state as VisitDetailLocationState | null
   const cachedVisitTitle = locationState?.visitTitle ?? ''
   const [visit, setVisit] = useState<Visit | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeletingVisit, setIsDeletingVisit] = useState(false)
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
 
   useEffect(() => {
     if (!user || !visitId) {
@@ -93,6 +90,45 @@ function VisitDetailPage() {
   }, [user, visitId])
 
   const pageTitle = visit?.title ?? cachedVisitTitle
+
+  function handleRequestDeleteVisit() {
+    setIsDeleteDialogOpen(true)
+    setDeleteErrorMessage('')
+  }
+
+  function handleCancelDeleteVisit() {
+    if (isDeletingVisit) {
+      return
+    }
+
+    setIsDeleteDialogOpen(false)
+    setDeleteErrorMessage('')
+  }
+
+  async function handleConfirmDeleteVisit() {
+    if (!user || !visit) {
+      setDeleteErrorMessage('삭제할 방문 기록을 확인할 수 없습니다.')
+      return
+    }
+
+    setIsDeletingVisit(true)
+    setDeleteErrorMessage('')
+
+    const { error } = await supabase
+      .from('visits')
+      .delete()
+      .eq('id', visit.id)
+      .eq('user_id', user.id)
+
+    setIsDeletingVisit(false)
+
+    if (error) {
+      setDeleteErrorMessage(error.message)
+      return
+    }
+
+    navigate('/')
+  }
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-950">
@@ -171,17 +207,16 @@ function VisitDetailPage() {
                   </div>
 
                   <div className="mt-2 flex flex-col gap-3 border-t border-stone-200 pt-6 sm:flex-row">
-                    <button
+                    <Link
                       className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-sky-50 px-4 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-700/15"
-                      onClick={() => handleEditVisitClick(visit)}
-                      type="button"
+                      to={`/visits/${visit.id}/edit`}
                     >
                       <PencilSquareIcon aria-hidden="true" className="size-4" />
                       수정
-                    </button>
+                    </Link>
                     <button
                       className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 focus:outline-none focus:ring-4 focus:ring-rose-700/15"
-                      onClick={() => handleDeleteVisitClick(visit)}
+                      onClick={handleRequestDeleteVisit}
                       type="button"
                     >
                       <TrashIcon aria-hidden="true" className="size-4" />
@@ -201,6 +236,14 @@ function VisitDetailPage() {
           />
         </div>
       </main>
+      <ConfirmDialog
+        errorMessage={deleteErrorMessage}
+        isConfirming={isDeletingVisit}
+        isOpen={isDeleteDialogOpen}
+        message={`${pageTitle || '선택한 방문 기록'}을 삭제하시겠습니까?`}
+        onCancel={handleCancelDeleteVisit}
+        onConfirm={handleConfirmDeleteVisit}
+      />
     </div>
   )
 }

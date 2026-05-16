@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/layout/AppHeader'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useAuth } from '../features/auth/useAuth'
 import NaverMap, {
   type SelectedRegion,
@@ -15,6 +16,9 @@ function HomePage() {
   const [visits, setVisits] = useState<Visit[]>([])
   const [isLoadingVisits, setIsLoadingVisits] = useState(true)
   const [visitErrorMessage, setVisitErrorMessage] = useState('')
+  const [visitToDelete, setVisitToDelete] = useState<Visit | null>(null)
+  const [isDeletingVisit, setIsDeletingVisit] = useState(false)
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
 
   const visitedRegionCodes = useMemo(
     () => Array.from(new Set(visits.map((visit) => visit.region_code))),
@@ -31,6 +35,48 @@ function HomePage() {
     },
     [navigate],
   )
+
+  function handleRequestDeleteVisit(visit: Visit) {
+    setVisitToDelete(visit)
+    setDeleteErrorMessage('')
+  }
+
+  function handleCancelDeleteVisit() {
+    if (isDeletingVisit) {
+      return
+    }
+
+    setVisitToDelete(null)
+    setDeleteErrorMessage('')
+  }
+
+  async function handleConfirmDeleteVisit() {
+    if (!user || !visitToDelete) {
+      setDeleteErrorMessage('삭제할 방문 기록을 확인할 수 없습니다.')
+      return
+    }
+
+    setIsDeletingVisit(true)
+    setDeleteErrorMessage('')
+
+    const { error } = await supabase
+      .from('visits')
+      .delete()
+      .eq('id', visitToDelete.id)
+      .eq('user_id', user.id)
+
+    setIsDeletingVisit(false)
+
+    if (error) {
+      setDeleteErrorMessage(error.message)
+      return
+    }
+
+    setVisits((currentVisits) =>
+      currentVisits.filter((visit) => visit.id !== visitToDelete.id),
+    )
+    setVisitToDelete(null)
+  }
 
   useEffect(() => {
     if (!user) {
@@ -82,6 +128,7 @@ function HomePage() {
         <VisitListPanel
           errorMessage={visitErrorMessage}
           isLoading={isLoadingVisits}
+          onRequestDeleteVisit={handleRequestDeleteVisit}
           visits={visits}
         />
         <NaverMap
@@ -89,6 +136,16 @@ function HomePage() {
           visitedRegionCodes={visitedRegionCodes}
         />
       </main>
+      <ConfirmDialog
+        errorMessage={deleteErrorMessage}
+        isConfirming={isDeletingVisit}
+        isOpen={Boolean(visitToDelete)}
+        message={`${
+          visitToDelete?.title ?? '선택한 방문 기록'
+        }을 삭제하시겠습니까?`}
+        onCancel={handleCancelDeleteVisit}
+        onConfirm={handleConfirmDeleteVisit}
+      />
     </div>
   )
 }
