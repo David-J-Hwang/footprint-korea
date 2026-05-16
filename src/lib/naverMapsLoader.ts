@@ -3,8 +3,12 @@ const NAVER_MAP_CALLBACK_NAME = 'initNaverMaps'
 
 let naverMapsScriptPromise: Promise<void> | null = null
 
+function isNaverMapsReady() {
+  return Boolean(window.naver?.maps)
+}
+
 export function loadNaverMapsScript() {
-  if (window.naver?.maps) {
+  if (isNaverMapsReady()) {
     return Promise.resolve()
   }
 
@@ -26,7 +30,7 @@ export function loadNaverMapsScript() {
         return
       }
 
-      if (window.naver?.maps) {
+      if (isNaverMapsReady()) {
         isSettled = true
         resolve()
         return
@@ -37,7 +41,7 @@ export function loadNaverMapsScript() {
           return
         }
 
-        if (window.naver?.maps) {
+        if (isNaverMapsReady()) {
           isSettled = true
           resolve()
           return
@@ -72,7 +76,7 @@ export function loadNaverMapsScript() {
     }
 
     if (existingScript) {
-      if (window.naver?.maps) {
+      if (isNaverMapsReady()) {
         resolve()
         return
       }

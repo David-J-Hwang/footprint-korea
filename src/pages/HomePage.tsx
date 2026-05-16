@@ -40,14 +40,14 @@ function HomePage() {
     let isMounted = true
     const userId = user.id
 
-    setIsLoadingVisits(true)
-    setVisitErrorMessage('')
-
     async function loadVisits() {
+      setIsLoadingVisits(true)
+      setVisitErrorMessage('')
+
       const { data, error } = await supabase
         .from('visits')
         .select(
-          'id,title,region_code,region_name,started_on,ended_on,category,memo,created_at',
+          'id,title,region_code,region_name,started_on,ended_on,category,memo,latitude,longitude,created_at',
         )
         .eq('user_id', userId)
         .order('started_on', { ascending: false })

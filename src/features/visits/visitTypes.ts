@@ -13,10 +13,12 @@ export type Visit = {
   created_at: string
   ended_on: string | null
   id: string
+  latitude: number | null
+  longitude: number | null
   memo: string | null
   region_code: string
   region_name: string
-  started_on: string
+  started_on: string | null
   title: string
 }
 

@@ -29,11 +29,11 @@ function getSigunguLayerStyle(
 
   return {
     clickable: true,
-    fillColor: isVisited ? '#22c55e' : '#10b981',
-    fillOpacity: isVisited ? 0.4 : 0.08,
-    strokeColor: isVisited ? '#16a34a' : '#047857',
-    strokeOpacity: isVisited ? 0.95 : 0.7,
-    strokeWeight: isVisited ? 2 : 1,
+    fillColor: isVisited ? '#16a34a' : '#10b981',
+    fillOpacity: isVisited ? 0.46 : 0.06,
+    strokeColor: isVisited ? '#22c55e' : '#34d399',
+    strokeOpacity: isVisited ? 0.8 : 0.65,
+    strokeWeight: isVisited ? 1.5 : 1,
   }
 }
 
@@ -126,10 +126,10 @@ async function addSigunguLayer(
     map.data.revertStyle()
     map.data.overrideStyle(event.feature, {
       fillColor: '#059669',
-      fillOpacity: 0.2,
+      fillOpacity: 0.18,
       strokeColor: '#065f46',
-      strokeOpacity: 1,
-      strokeWeight: 3,
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
     })
 
     regionInfoWindow.setContent(

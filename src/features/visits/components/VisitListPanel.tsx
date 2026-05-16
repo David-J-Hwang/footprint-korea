@@ -12,7 +12,15 @@ type VisitListPanelProps = {
   visits: Visit[]
 }
 
-function formatVisitDateRange(startedOn: string, endedOn: string | null) {
+function formatVisitDateRange(startedOn: string | null, endedOn: string | null) {
+  if (!startedOn && !endedOn) {
+    return 'unknown'
+  }
+
+  if (!startedOn) {
+    return `unknown - ${endedOn}`
+  }
+
   if (!endedOn || endedOn === startedOn) {
     return startedOn
   }

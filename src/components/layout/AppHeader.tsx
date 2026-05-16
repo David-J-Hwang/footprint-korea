@@ -42,7 +42,7 @@ function AppHeader() {
     <header className="border-b border-emerald-900/20 bg-emerald-800 text-white shadow-sm">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
         <Link
-          className="min-w-0 rounded-md text-lg font-semibold tracking-tight transition hover:text-emerald-100 focus:outline-none focus:ring-4 focus:ring-white/20 sm:text-xl"
+          className="min-w-0 rounded-md text-lg font-semibold tracking-tight focus:outline-none focus:ring-4 focus:ring-white/20 sm:text-xl"
           to="/"
         >
           Footprint Korea

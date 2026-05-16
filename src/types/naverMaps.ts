@@ -1,4 +1,13 @@
-export type NaverLatLng = object
+export type NaverLatLng = {
+  lat: () => number
+  lng: () => number
+}
+
+export type NaverLatLngBounds = object
+
+export type NaverMarker = {
+  setMap: (map: NaverMap | null) => void
+}
 
 export type NaverPoint = object
 
@@ -50,7 +59,10 @@ export type NaverMapDataLayer = {
 
 export type NaverMap = {
   data: NaverMapDataLayer
+  fitBounds: (bounds: NaverLatLngBounds) => void
+  setCenter: (center: NaverLatLng) => void
   setSize: (size: NaverSize) => void
+  setZoom: (zoom: number) => void
 }
 
 export type NaverInfoWindowOptions = {
@@ -66,7 +78,7 @@ export type NaverInfoWindowOptions = {
 
 export type NaverInfoWindow = {
   close: () => void
-  open: (map: NaverMap, anchor?: NaverLatLng) => void
+  open: (map: NaverMap, anchor?: NaverLatLng | NaverMarker) => void
   setContent: (content: string | HTMLElement) => void
 }
 
@@ -81,14 +93,25 @@ export type NaverMapOptions = {
   }
 }
 
+export type NaverMarkerOptions = {
+  map?: NaverMap
+  position: NaverLatLng
+  title?: string
+}
+
 export type NaverMaps = {
   maps: {
     InfoWindow: new (options?: NaverInfoWindowOptions) => NaverInfoWindow
     LatLng: new (lat: number, lng: number) => NaverLatLng
+    LatLngBounds: new (
+      southWest: NaverLatLng,
+      northEast: NaverLatLng,
+    ) => NaverLatLngBounds
     Map: new (
       mapDiv: string | HTMLElement,
       mapOptions?: NaverMapOptions,
     ) => NaverMap
+    Marker: new (options: NaverMarkerOptions) => NaverMarker
     Point: new (x: number, y: number) => NaverPoint
     Size: new (width: number, height: number) => NaverSize
     Event: {
