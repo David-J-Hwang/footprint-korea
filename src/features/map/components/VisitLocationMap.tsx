@@ -395,16 +395,16 @@ function VisitLocationMap({
   return (
     <section className="min-w-0">
       <div className="mb-3">
-        <p className="text-sm font-medium text-emerald-700">위치 선택</p>
-        <h2 className="mt-1 text-xl font-semibold text-stone-950">지도</h2>
+        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">위치 선택</p>
+        <h2 className="mt-1 text-xl font-semibold text-stone-950 dark:text-stone-50">지도</h2>
         <p
-          className="mt-2 text-sm text-stone-600"
+          className="mt-2 text-sm text-stone-600 dark:text-stone-400"
         >
           {locationSelectMessage || '지도를 클릭하면 좌표가 입력됩니다.'}
         </p>
       </div>
       <div
-        className="relative h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm sm:h-[420px] lg:h-[calc(100vh-12rem)]"
+        className="relative h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:h-[420px] lg:h-[calc(100vh-12rem)]"
         ref={containerRef}
       >
         <div
@@ -416,21 +416,21 @@ function VisitLocationMap({
         />
 
         {status !== 'ready' ? (
-          <div className="absolute inset-0 grid place-items-center bg-stone-100/90 px-6 text-center">
+          <div className="absolute inset-0 grid place-items-center bg-stone-100/90 px-6 text-center dark:bg-stone-900/90">
             {status === 'loading' ? (
-              <p className="text-sm font-medium text-stone-600">
+              <p className="text-sm font-medium text-stone-600 dark:text-stone-300">
                 네이버지도를 불러오는 중입니다.
               </p>
             ) : (
               <div>
-                <p className="text-sm font-semibold text-stone-800">
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                   지도를 불러오지 못했습니다.
                 </p>
-                <p className="mt-2 text-sm text-stone-600">
+                <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
                   Naver Cloud 설정과 Client ID를 확인해주세요.
                 </p>
                 {errorMessage ? (
-                  <p className="mt-2 text-xs text-stone-500">
+                  <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
                     {errorMessage}
                   </p>
                 ) : null}

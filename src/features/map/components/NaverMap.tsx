@@ -510,8 +510,8 @@ function getViewModeButtonClass(isActive: boolean) {
   return [
     'h-9 cursor-pointer px-3 text-sm font-semibold transition sm:px-4',
     isActive
-      ? 'bg-emerald-700 text-white'
-      : 'bg-white text-stone-700 hover:bg-emerald-50',
+      ? 'bg-emerald-700 text-white dark:bg-emerald-600'
+      : 'bg-white text-stone-700 hover:bg-emerald-50 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800',
   ].join(' ')
 }
 
@@ -766,10 +766,10 @@ function NaverMap({
 
   return (
     <div
-      className="relative h-[420px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm lg:h-[calc(100vh-12rem)]"
+      className="relative h-[420px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm dark:border-stone-800 dark:bg-stone-900 lg:h-[calc(100vh-12rem)]"
       ref={containerRef}
     >
-      <div className="absolute left-3 top-3 z-10 inline-flex overflow-hidden rounded-md border border-white/80 bg-white shadow-md">
+      <div className="absolute left-3 top-3 z-10 inline-flex overflow-hidden rounded-md border border-white/80 bg-white shadow-md dark:border-stone-700 dark:bg-stone-900">
         <button
           className={getViewModeButtonClass(mapViewMode === 'regions')}
           disabled={status !== 'ready'}
@@ -797,21 +797,21 @@ function NaverMap({
       />
 
       {status !== 'ready' ? (
-        <div className="absolute inset-0 grid place-items-center bg-stone-100/90 px-6 text-center">
+        <div className="absolute inset-0 grid place-items-center bg-stone-100/90 px-6 text-center dark:bg-stone-900/90">
           {status === 'loading' ? (
-            <p className="text-sm font-medium text-stone-600">
+            <p className="text-sm font-medium text-stone-600 dark:text-stone-300">
               네이버지도를 불러오는 중입니다.
             </p>
           ) : (
             <div>
-              <p className="text-sm font-semibold text-stone-800">
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                 지도를 불러오지 못했습니다.
               </p>
-              <p className="mt-2 text-sm text-stone-600">
+              <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
                 Naver Cloud 설정과 행정구역 GeoJSON 파일을 확인해주세요.
               </p>
               {errorMessage ? (
-                <p className="mt-2 text-xs text-stone-500">{errorMessage}</p>
+                <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">{errorMessage}</p>
               ) : null}
             </div>
           )}

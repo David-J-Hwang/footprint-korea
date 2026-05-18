@@ -65,9 +65,9 @@ const cityTiles = [
 
 function SignupPage() {
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
+    <main className="min-h-screen bg-stone-50 text-stone-950 dark:bg-stone-950 dark:text-stone-100">
       <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-5 py-10">
-        <section className="grid w-full max-w-5xl overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm md:grid-cols-[1fr_420px]">
+        <section className="grid w-full max-w-5xl overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900 md:grid-cols-[1fr_420px]">
           <div className="hidden min-h-[560px] bg-[linear-gradient(135deg,#0f766e_0%,#1f7a5c_45%,#3f3428_100%)] p-10 text-white md:flex md:flex-col md:justify-between">
             <div>
               <p className="text-sm font-medium text-emerald-100">
@@ -121,7 +121,7 @@ function SignupPage() {
                 <p className="text-sm font-medium text-emerald-700">
                   Footprint Korea
                 </p>
-                <h1 className="mt-3 text-3xl font-semibold leading-tight text-stone-950">
+                <h1 className="mt-3 text-3xl font-semibold leading-tight text-stone-950 dark:text-stone-50">
                   다시 떠날 곳을 한눈에 남겨요
                 </h1>
               </div>

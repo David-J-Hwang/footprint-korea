@@ -26,35 +26,43 @@ const VISIT_CATEGORY_BADGE_CONFIG: Record<
 > = {
   attraction: {
     Icon: CameraIcon,
-    className: 'bg-teal-50 text-teal-700 ring-teal-200/70',
+    className:
+      'bg-teal-50 text-teal-700 ring-teal-200/70 dark:bg-teal-500/10 dark:text-teal-300 dark:ring-teal-400/20',
   },
   cafe: {
     Icon: CakeIcon,
-    className: 'bg-amber-50 text-amber-700 ring-amber-200/70',
+    className:
+      'bg-amber-50 text-amber-700 ring-amber-200/70 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20',
   },
   nature: {
     Icon: GlobeAsiaAustraliaIcon,
-    className: 'bg-lime-50 text-lime-700 ring-lime-200/70',
+    className:
+      'bg-lime-50 text-lime-700 ring-lime-200/70 dark:bg-lime-500/10 dark:text-lime-300 dark:ring-lime-400/20',
   },
   other: {
     Icon: TagIcon,
-    className: 'bg-stone-100 text-stone-700 ring-stone-200',
+    className:
+      'bg-stone-100 text-stone-700 ring-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:ring-stone-700',
   },
   restaurant: {
     Icon: BuildingStorefrontIcon,
-    className: 'bg-orange-50 text-orange-700 ring-orange-200/70',
+    className:
+      'bg-orange-50 text-orange-700 ring-orange-200/70 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-400/20',
   },
   shopping: {
     Icon: ShoppingBagIcon,
-    className: 'bg-rose-50 text-rose-700 ring-rose-200/70',
+    className:
+      'bg-rose-50 text-rose-700 ring-rose-200/70 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-400/20',
   },
   stay: {
     Icon: HomeIcon,
-    className: 'bg-indigo-50 text-indigo-700 ring-indigo-200/70',
+    className:
+      'bg-indigo-50 text-indigo-700 ring-indigo-200/70 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-400/20',
   },
   transport: {
     Icon: TruckIcon,
-    className: 'bg-sky-50 text-sky-700 ring-sky-200/70',
+    className:
+      'bg-sky-50 text-sky-700 ring-sky-200/70 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-400/20',
   },
 }
 

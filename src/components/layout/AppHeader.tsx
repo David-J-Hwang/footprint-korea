@@ -1,6 +1,11 @@
+import {
+  MoonIcon,
+  SunIcon,
+} from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../features/auth/useAuth'
+import { useTheme } from '../../features/theme/useTheme'
 import { supabase } from '../../lib/supabaseClient'
 
 function getDisplayName(email?: string) {
@@ -14,9 +19,11 @@ function getDisplayName(email?: string) {
 function AppHeader() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { themeMode, toggleThemeMode } = useTheme()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const displayName = getDisplayName(user?.email)
+  const isDarkMode = themeMode === 'dark'
 
   async function handleSignOut() {
     setErrorMessage('')
@@ -52,6 +59,18 @@ function AppHeader() {
           <p className="hidden text-sm font-medium text-emerald-50 sm:block">
             <span className="break-all">{displayName}</span>님, 환영합니다.
           </p>
+          <button
+            aria-label={isDarkMode ? '라이트모드로 전환' : '다크모드로 전환'}
+            className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/20 bg-emerald-900/30 text-white transition hover:bg-white/10 focus:outline-none focus:ring-4 focus:ring-white/20"
+            onClick={toggleThemeMode}
+            type="button"
+          >
+            {isDarkMode ? (
+              <SunIcon aria-hidden="true" className="size-5" />
+            ) : (
+              <MoonIcon aria-hidden="true" className="size-5" />
+            )}
+          </button>
           <button
             className="h-9 shrink-0 cursor-pointer rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-not-allowed disabled:bg-white/50 disabled:text-emerald-950/50 sm:h-10 sm:px-4"
             disabled={isSigningOut}

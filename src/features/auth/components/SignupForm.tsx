@@ -62,8 +62,8 @@ function SignupForm() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <p className="text-sm font-medium text-emerald-700">회원가입</p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950">
+        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">회원가입</p>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
           새 계정을 만들어보세요
         </h2>
       </div>
@@ -71,14 +71,14 @@ function SignupForm() {
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
           <label
-            className="mb-2 block text-sm font-medium text-stone-700"
+            className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
             htmlFor="signup-email"
           >
             이메일
           </label>
           <input
             autoComplete="email"
-            className="h-12 w-full rounded-md border border-stone-300 bg-white px-4 text-base text-stone-950 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+            className="h-12 w-full rounded-md border border-stone-300 bg-white px-4 text-base text-stone-950 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:placeholder:text-stone-500"
             disabled={isSubmitting}
             id="signup-email"
             name="email"
@@ -92,14 +92,14 @@ function SignupForm() {
 
         <div>
           <label
-            className="mb-2 block text-sm font-medium text-stone-700"
+            className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
             htmlFor="signup-password"
           >
             비밀번호
           </label>
           <input
             autoComplete="new-password"
-            className="h-12 w-full rounded-md border border-stone-300 bg-white px-4 text-base text-stone-950 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+            className="h-12 w-full rounded-md border border-stone-300 bg-white px-4 text-base text-stone-950 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:placeholder:text-stone-500"
             disabled={isSubmitting}
             id="signup-password"
             minLength={6}
@@ -114,14 +114,14 @@ function SignupForm() {
 
         <div>
           <label
-            className="mb-2 block text-sm font-medium text-stone-700"
+            className="mb-2 block text-sm font-medium text-stone-700 dark:text-stone-300"
             htmlFor="signup-password-confirm"
           >
             비밀번호 확인
           </label>
           <input
             autoComplete="new-password"
-            className="h-12 w-full rounded-md border border-stone-300 bg-white px-4 text-base text-stone-950 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+            className="h-12 w-full rounded-md border border-stone-300 bg-white px-4 text-base text-stone-950 outline-none transition focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:placeholder:text-stone-500"
             disabled={isSubmitting}
             id="signup-password-confirm"
             minLength={6}
@@ -145,7 +145,7 @@ function SignupForm() {
         {errorMessage ? (
           <p
             aria-live="polite"
-            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300"
           >
             {errorMessage}
           </p>
@@ -154,17 +154,17 @@ function SignupForm() {
         {successMessage ? (
           <p
             aria-live="polite"
-            className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+            className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300"
           >
             {successMessage}
           </p>
         ) : null}
       </form>
 
-      <p className="mt-8 text-center text-sm text-stone-600">
+      <p className="mt-8 text-center text-sm text-stone-600 dark:text-stone-400">
         이미 계정이 있나요?{' '}
         <Link
-          className="font-semibold text-emerald-700 transition hover:text-emerald-800"
+          className="font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200"
           to="/login"
         >
           로그인

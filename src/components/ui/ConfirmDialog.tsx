@@ -51,26 +51,26 @@ function ConfirmDialog({
     <div
       aria-labelledby="confirm-dialog-title"
       aria-modal="true"
-      className="fixed inset-0 z-50 grid place-items-center bg-stone-950/45 px-4 py-6"
+      className="fixed inset-0 z-50 grid place-items-center bg-stone-950/45 px-4 py-6 dark:bg-stone-950/70"
       role="dialog"
     >
-      <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-5 shadow-xl">
+      <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-5 shadow-xl dark:border-stone-800 dark:bg-stone-900">
         <h2
-          className="text-lg font-semibold leading-7 text-stone-950"
+          className="text-lg font-semibold leading-7 text-stone-950 dark:text-stone-50"
           id="confirm-dialog-title"
         >
           {message}
         </h2>
 
         {errorMessage ? (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300">
             {errorMessage}
           </p>
         ) : null}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
-            className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-sky-50 px-4 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-700/15 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 sm:w-auto"
+            className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-sky-50 px-4 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-700/15 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/15 dark:disabled:bg-stone-800 dark:disabled:text-stone-500 sm:w-auto"
             disabled={isConfirming}
             onClick={onCancel}
             type="button"

@@ -59,16 +59,16 @@ function VisitListPanel({
   }
 
   return (
-    <aside className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm lg:flex lg:h-[calc(100vh-12rem)] lg:min-h-0 lg:flex-col lg:overflow-hidden">
+    <aside className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900 lg:flex lg:h-[calc(100vh-12rem)] lg:min-h-0 lg:flex-col lg:overflow-hidden">
       <div className="shrink-0">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-emerald-700">방문 기록</p>
-            <h1 className="mt-1 text-2xl font-semibold text-stone-950">
+            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">방문 기록</p>
+            <h1 className="mt-1 text-2xl font-semibold text-stone-950 dark:text-stone-50">
               방문한 곳
             </h1>
           </div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
             {visits.length}곳
           </span>
         </div>
@@ -82,25 +82,25 @@ function VisitListPanel({
       </div>
 
       {errorMessage ? (
-        <p className="mt-6 shrink-0 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+        <p className="mt-6 shrink-0 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300">
           {errorMessage}
         </p>
       ) : null}
 
       {isLoading ? (
-        <div className="mt-6 rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center">
-          <p className="text-sm font-semibold text-stone-800">
+        <div className="mt-6 rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center dark:border-stone-700 dark:bg-stone-950">
+          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
             방문 기록을 불러오는 중입니다.
           </p>
         </div>
       ) : null}
 
       {!isLoading && visits.length === 0 ? (
-        <div className="mt-6 rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center">
-          <p className="text-sm font-semibold text-stone-800">
+        <div className="mt-6 rounded-md border border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center dark:border-stone-700 dark:bg-stone-950">
+          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
             아직 등록된 방문지가 없습니다.
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600">
+          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
             방문지 생성 기능을 추가하면 이곳에 기록 목록이 표시됩니다.
           </p>
         </div>
@@ -116,10 +116,10 @@ function VisitListPanel({
                 aria-label={`${visit.title} 위치 보기`}
                 aria-pressed={isSelected}
                 className={[
-                  'block cursor-pointer rounded-md border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-emerald-700/15',
+                  'block cursor-pointer rounded-md border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-emerald-700/15 dark:focus:ring-emerald-300/15',
                   isSelected
-                    ? 'border-emerald-300 bg-emerald-50 shadow-sm'
-                    : 'border-stone-200 bg-stone-50 hover:border-emerald-200 hover:bg-emerald-50/40',
+                    ? 'border-emerald-300 bg-emerald-50 shadow-sm dark:border-emerald-500/50 dark:bg-emerald-500/10'
+                    : 'border-stone-200 bg-stone-50 hover:border-emerald-200 hover:bg-emerald-50/40 dark:border-stone-800 dark:bg-stone-950 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/10',
                 ].join(' ')}
                 key={visit.id}
                 onClick={() => onSelectVisit?.(visit)}
@@ -131,11 +131,11 @@ function VisitListPanel({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <VisitCategoryBadge category={visit.category} />
-                      <h2 className="min-w-0 text-base font-semibold text-stone-950">
+                      <h2 className="min-w-0 text-base font-semibold text-stone-950 dark:text-stone-50">
                         {visit.title}
                       </h2>
                     </div>
-                    <p className="mt-1 text-sm text-stone-600">
+                    <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
                       {visit.region_name}
                     </p>
                   </div>
@@ -143,7 +143,7 @@ function VisitListPanel({
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       aria-label={`${visit.title} 수정`}
-                      className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-sky-600 transition hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-700/15"
+                      className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-sky-600 transition hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus:ring-4 focus:ring-sky-700/15 dark:text-sky-300 dark:hover:bg-sky-500/10 dark:hover:text-sky-200"
                       onClick={(event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -155,7 +155,7 @@ function VisitListPanel({
                     </button>
                     <button
                       aria-label={`${visit.title} 삭제`}
-                      className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-700/15"
+                      className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full text-rose-600 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-700/15 dark:text-rose-300 dark:hover:bg-rose-500/10 dark:hover:text-rose-200"
                       onClick={(event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -167,7 +167,7 @@ function VisitListPanel({
                     </button>
                   </div>
                 </div>
-                <p className="mt-3 text-sm font-medium text-stone-700">
+                <p className="mt-3 text-sm font-medium text-stone-700 dark:text-stone-300">
                   {formatVisitDateRange(visit.started_on, visit.ended_on)}
                 </p>
               </div>

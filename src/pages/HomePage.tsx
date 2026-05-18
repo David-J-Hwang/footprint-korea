@@ -139,7 +139,7 @@ function HomePage() {
   }, [user])
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-950">
+    <div className="min-h-screen bg-stone-50 text-stone-950 dark:bg-stone-950 dark:text-stone-100">
       <AppHeader />
       <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-6 sm:px-5 lg:grid-cols-[minmax(240px,1fr)_3fr] lg:py-8">
         <VisitListPanel

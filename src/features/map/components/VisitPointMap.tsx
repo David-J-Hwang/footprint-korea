@@ -163,7 +163,7 @@ function VisitPointMap({ latitude, longitude, title }: VisitPointMapProps) {
   return (
     <section className="min-w-0">
       <div
-        className="relative h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm sm:h-[420px] lg:h-[calc(100vh-12rem)]"
+        className="relative h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:h-[420px] lg:h-[calc(100vh-12rem)]"
         ref={containerRef}
       >
         {latitude !== null && longitude !== null ? (
@@ -177,10 +177,10 @@ function VisitPointMap({ latitude, longitude, title }: VisitPointMapProps) {
         ) : (
           <div className="grid h-full place-items-center px-6 text-center">
             <div>
-              <p className="text-sm font-semibold text-stone-800">
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                 저장된 좌표가 없습니다.
               </p>
-              <p className="mt-2 text-sm text-stone-600">
+              <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
                 수정 페이지에서 위치를 선택하면 지도에 표시됩니다.
               </p>
             </div>
@@ -188,21 +188,21 @@ function VisitPointMap({ latitude, longitude, title }: VisitPointMapProps) {
         )}
 
         {latitude !== null && longitude !== null && status !== 'ready' ? (
-          <div className="absolute inset-0 grid place-items-center bg-stone-100/90 px-6 text-center">
+          <div className="absolute inset-0 grid place-items-center bg-stone-100/90 px-6 text-center dark:bg-stone-900/90">
             {status === 'loading' ? (
-              <p className="text-sm font-medium text-stone-600">
+              <p className="text-sm font-medium text-stone-600 dark:text-stone-300">
                 네이버지도를 불러오는 중입니다.
               </p>
             ) : (
               <div>
-                <p className="text-sm font-semibold text-stone-800">
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                   지도를 불러오지 못했습니다.
                 </p>
-                <p className="mt-2 text-sm text-stone-600">
+                <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
                   Naver Cloud 설정과 Client ID를 확인해주세요.
                 </p>
                 {errorMessage ? (
-                  <p className="mt-2 text-xs text-stone-500">
+                  <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
                     {errorMessage}
                   </p>
                 ) : null}
