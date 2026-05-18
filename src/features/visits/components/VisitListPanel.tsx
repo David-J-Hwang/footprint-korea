@@ -135,7 +135,7 @@ function VisitListPanel({
                         {visit.title}
                       </h2>
                     </div>
-                    <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
+                    <p className="mt-2 text-xs text-stone-600 dark:text-stone-400">
                       {visit.region_name}
                     </p>
                   </div>

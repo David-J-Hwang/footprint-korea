@@ -47,9 +47,9 @@ function AppHeader() {
 
   return (
     <header className="border-b border-emerald-900/20 bg-emerald-800 text-white shadow-sm">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-5 sm:py-2.5">
         <Link
-          className="min-w-0 rounded-md text-lg font-semibold tracking-tight focus:outline-none focus:ring-4 focus:ring-white/20 sm:text-xl"
+          className="min-w-0 rounded-md text-base font-semibold tracking-tight focus:outline-none focus:ring-4 focus:ring-white/20 sm:text-lg"
           to="/"
         >
           Footprint Korea
@@ -61,18 +61,18 @@ function AppHeader() {
           </p>
           <button
             aria-label={isDarkMode ? '라이트모드로 전환' : '다크모드로 전환'}
-            className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/20 bg-emerald-900/30 text-white transition hover:bg-white/10 focus:outline-none focus:ring-4 focus:ring-white/20"
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-white/20 bg-emerald-900/30 text-white transition hover:bg-white/10 focus:outline-none focus:ring-4 focus:ring-white/20"
             onClick={toggleThemeMode}
             type="button"
           >
             {isDarkMode ? (
-              <SunIcon aria-hidden="true" className="size-5" />
+              <SunIcon aria-hidden="true" className="size-4" />
             ) : (
-              <MoonIcon aria-hidden="true" className="size-5" />
+              <MoonIcon aria-hidden="true" className="size-4" />
             )}
           </button>
           <button
-            className="h-9 shrink-0 cursor-pointer rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-not-allowed disabled:bg-white/50 disabled:text-emerald-950/50 sm:h-10 sm:px-4"
+            className="h-8 shrink-0 cursor-pointer rounded-md border border-white/20 bg-white px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:cursor-not-allowed disabled:bg-white/50 disabled:text-emerald-950/50 sm:h-9 sm:px-4"
             disabled={isSigningOut}
             onClick={handleSignOut}
             type="button"
