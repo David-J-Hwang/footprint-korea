@@ -5,3 +5,8 @@
 body {
   margin: 0;
 }
+
+.visit-location-map,
+.visit-location-map * {
+  cursor: pointer !important;
+}

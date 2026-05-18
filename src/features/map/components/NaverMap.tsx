@@ -10,6 +10,7 @@ import { loadNaverMapsScript } from '../../../lib/naverMapsLoader'
 import type {
   GeoJsonFeatureCollection,
   NaverInfoWindow,
+  NaverLatLng,
   NaverMap as NaverMapInstance,
   NaverMarker,
 } from '../../../types/naverMaps'
@@ -26,6 +27,8 @@ export type MapViewMode = 'regions' | 'points'
 
 export type SelectedRegion = {
   code: string
+  latitude?: number
+  longitude?: number
   name: string
 }
 
@@ -394,6 +397,7 @@ function focusVisitOnMap(map: NaverMapInstance, visit: VisitWithLocation) {
 function createRegionInfoWindowContent(
   regionName: string,
   regionCode: string,
+  clickedLocation: NaverLatLng,
   onCreateVisit?: (region: SelectedRegion) => void,
 ) {
   const content = document.createElement('div')
@@ -419,6 +423,8 @@ function createRegionInfoWindowContent(
   button.addEventListener('click', () => {
     onCreateVisit?.({
       code: regionCode,
+      latitude: clickedLocation.lat(),
+      longitude: clickedLocation.lng(),
       name: regionName,
     })
   })
@@ -485,7 +491,12 @@ async function addSigunguLayer(
     })
 
     regionInfoWindow.setContent(
-      createRegionInfoWindowContent(regionName, regionCode, onCreateVisit),
+      createRegionInfoWindowContent(
+        regionName,
+        regionCode,
+        event.coord,
+        onCreateVisit,
+      ),
     )
     regionInfoWindow.open(map, event.coord)
 

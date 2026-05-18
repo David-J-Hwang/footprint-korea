@@ -29,16 +29,35 @@ function toRegionOptions(regionCodeMap: RegionCodeMap) {
     .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
 }
 
+function getQueryLocation(searchParams: URLSearchParams) {
+  const latitude = Number(searchParams.get('lat'))
+  const longitude = Number(searchParams.get('lng'))
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null
+  }
+
+  return {
+    latitude,
+    longitude,
+  }
+}
+
 function NewVisitPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const queryRegionCode = searchParams.get('regionCode') ?? ''
+  const queryLocation = getQueryLocation(searchParams)
 
   const [regionOptions, setRegionOptions] = useState<RegionOption[]>([])
   const [title, setTitle] = useState('')
-  const [latitude, setLatitude] = useState<number | null>(null)
-  const [longitude, setLongitude] = useState<number | null>(null)
+  const [latitude, setLatitude] = useState<number | null>(
+    queryLocation?.latitude ?? null,
+  )
+  const [longitude, setLongitude] = useState<number | null>(
+    queryLocation?.longitude ?? null,
+  )
   const [regionCode, setRegionCode] = useState(queryRegionCode)
   const [startedOn, setStartedOn] = useState('')
   const [endedOn, setEndedOn] = useState('')
@@ -52,6 +71,16 @@ function NewVisitPage() {
     () => regionOptions.find((region) => region.code === regionCode),
     [regionCode, regionOptions],
   )
+  const selectedLocation = useMemo<SelectedVisitLocation | null>(() => {
+    if (latitude === null || longitude === null) {
+      return null
+    }
+
+    return {
+      latitude,
+      longitude,
+    }
+  }, [latitude, longitude])
 
   useEffect(() => {
     let isMounted = true
@@ -307,6 +336,7 @@ function NewVisitPage() {
 
           <VisitLocationMap
             onSelectLocation={handleSelectLocation}
+            selectedLocation={selectedLocation}
             selectedRegionCode={regionCode}
           />
         </div>

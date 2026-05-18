@@ -159,11 +159,22 @@ function createSelectedLocationInfoWindowContent(
   return content
 }
 
+function isSameLocation(
+  firstLocation: SelectedVisitLocation,
+  secondLocation: SelectedVisitLocation,
+) {
+  return (
+    Math.abs(firstLocation.latitude - secondLocation.latitude) < 0.0000001 &&
+    Math.abs(firstLocation.longitude - secondLocation.longitude) < 0.0000001
+  )
+}
+
 function updateSelectedMarker(
   map: NaverMapInstance,
   markerInfoWindow: NaverInfoWindow | null,
   currentMarker: NaverMarker | null,
   location: SelectedVisitLocation,
+  shouldFocusMap = true,
 ) {
   if (!window.naver?.maps) {
     return null
@@ -183,8 +194,11 @@ function updateSelectedMarker(
 
   markerInfoWindow?.setContent(createSelectedLocationInfoWindowContent(location))
   markerInfoWindow?.open(map, marker)
-  map.setCenter(position)
-  map.setZoom(15)
+
+  if (shouldFocusMap) {
+    map.setCenter(position)
+    map.setZoom(15)
+  }
 
   return marker
 }
@@ -200,6 +214,7 @@ function VisitLocationMap({
   const markerInfoWindowRef = useRef<NaverInfoWindow | null>(null)
   const selectedMarkerRef = useRef<NaverMarker | null>(null)
   const onSelectLocationRef = useRef(onSelectLocation)
+  const mapClickLocationRef = useRef<SelectedVisitLocation | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
     'loading',
   )
@@ -222,6 +237,8 @@ function VisitLocationMap({
         const naverMaps = window.naver.maps
         const map = new naverMaps.Map(mapElementRef.current, {
           center: new naverMaps.LatLng(36.5, 127.8),
+          draggableCursor: 'pointer',
+          draggingCursor: 'pointer',
           mapDataControl: false,
           scaleControl: false,
           zoom: 7,
@@ -264,12 +281,14 @@ function VisitLocationMap({
           }
 
           const location = toSelectedLocation(coord)
+          mapClickLocationRef.current = location
 
           selectedMarkerRef.current = updateSelectedMarker(
             map,
             markerInfoWindowRef.current,
             selectedMarkerRef.current,
             location,
+            false,
           )
           onSelectLocationRef.current?.(location)
           setLocationSelectMessage('선택한 위치의 좌표가 양식에 입력되었습니다.')
@@ -295,12 +314,21 @@ function VisitLocationMap({
       selectedMarkerRef.current?.setMap(null)
       selectedMarkerRef.current = null
       markerInfoWindowRef.current = null
+      mapClickLocationRef.current = null
       mapRef.current = null
     }
   }, [])
 
   useEffect(() => {
     if (status !== 'ready' || !mapRef.current || !selectedLocation) {
+      return
+    }
+
+    if (
+      mapClickLocationRef.current &&
+      isSameLocation(selectedLocation, mapClickLocationRef.current)
+    ) {
+      mapClickLocationRef.current = null
       return
     }
 
@@ -404,10 +432,11 @@ function VisitLocationMap({
         </p>
       </div>
       <div
-        className="relative h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:h-[420px] lg:h-[calc(100vh-12rem)]"
+        className="relative h-[320px] cursor-pointer overflow-hidden rounded-lg border border-stone-200 bg-stone-100 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:h-[420px] lg:h-[calc(100vh-12rem)]"
         ref={containerRef}
       >
         <div
+          className="visit-location-map cursor-pointer"
           ref={mapElementRef}
           style={{
             height: '100%',

@@ -29,6 +29,16 @@ function HomePage() {
         regionCode: region.code,
       })
 
+      if (
+        typeof region.latitude === 'number' &&
+        Number.isFinite(region.latitude) &&
+        typeof region.longitude === 'number' &&
+        Number.isFinite(region.longitude)
+      ) {
+        params.set('lat', region.latitude.toString())
+        params.set('lng', region.longitude.toString())
+      }
+
       navigate(`/visits/new?${params.toString()}`)
     },
     [navigate],

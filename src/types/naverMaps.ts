@@ -85,6 +85,8 @@ export type NaverInfoWindow = {
 
 export type NaverMapOptions = {
   center?: NaverLatLng
+  draggableCursor?: string
+  draggingCursor?: string
   mapDataControl?: boolean
   scaleControl?: boolean
   zoom?: number
