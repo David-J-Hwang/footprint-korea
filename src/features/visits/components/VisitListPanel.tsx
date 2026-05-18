@@ -17,12 +17,8 @@ type VisitListPanelProps = {
 }
 
 function formatVisitDateRange(startedOn: string | null, endedOn: string | null) {
-  if (!startedOn && !endedOn) {
-    return 'unknown'
-  }
-
   if (!startedOn) {
-    return `unknown - ${endedOn}`
+    return null
   }
 
   if (!endedOn || endedOn === startedOn) {
@@ -110,6 +106,10 @@ function VisitListPanel({
         <div className="mt-6 grid gap-3 lg:min-h-0 lg:flex-1 lg:auto-rows-max lg:overflow-y-auto lg:pr-3">
           {visits.map((visit) => {
             const isSelected = selectedVisitId === visit.id
+            const visitDateText = formatVisitDateRange(
+              visit.started_on,
+              visit.ended_on,
+            )
 
             return (
               <div
@@ -167,9 +167,11 @@ function VisitListPanel({
                     </button>
                   </div>
                 </div>
-                <p className="mt-3 text-sm font-medium text-stone-700 dark:text-stone-300">
-                  {formatVisitDateRange(visit.started_on, visit.ended_on)}
-                </p>
+                {visitDateText ? (
+                  <p className="mt-3 text-sm font-medium text-stone-700 dark:text-stone-300">
+                    {visitDateText}
+                  </p>
+                ) : null}
               </div>
             )
           })}
