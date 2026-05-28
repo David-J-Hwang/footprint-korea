@@ -48,11 +48,11 @@
   - ✅홈페이지에서 특정 지점을 클릭한 후 해당하는 행정구역을 대상으로 새 방문지를 추가할 때 마지막으로 클릭했던 위치를 나타내도록 만들기
   - ✅날짜가 정해지지 않은 경우 `unknown` 문구 없애고 카드만 나타내기
   - ✅모바일 디스플레이 환경에서 방문지 카드의 제목과 행정구역 텍스트 간 거리 띄우기
+  - ✅GitHub Actions를 사용해서 배포하기(.github 폴더의 .yml 파일 사용하기)
+    - ✅홈페이지의 지도로딩 실패이슈 해결하기 - 안드로이드 9 이상에서는 HTTP 평문 통신이 기본적으로 사용되지 않습니다.앱에서 네트워크 보안 구성 (https://developer.android.com/training/articles/security-config) 을 통해 *.map.naver.com, *.map.naver.net 에 대한 평문 통신을 허용해 주세요.
   
   - 지역검색을 더 쉽게 할 수 있도록 지역검색 기능 추가하기
   - 방문한 곳을 필터링할 수 있는 기능 추가하기
   - 방문한 곳을 검색할 수 있는 검색바 추가하기
   - 구글계정 로그인 기능 추가하기
-
-  - GitHub Actions를 사용해서 배포하기(.github 폴더의 .yml 파일 사용하기)
-    - 홈페이지의 지도로딩 실패이슈 해결하기 - 안드로이드 9 이상에서는 HTTP 평문 통신이 기본적으로 사용되지 않습니다.앱에서 네트워크 보안 구성 (https://developer.android.com/training/articles/security-config) 을 통해 *.map.naver.com, *.map.naver.net 에 대한 평문 통신을 허용해 주세요.
+  - 페이지네이션 기능 추가하기
