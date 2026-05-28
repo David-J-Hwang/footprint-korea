@@ -55,3 +55,4 @@
   - 구글계정 로그인 기능 추가하기
 
   - GitHub Actions를 사용해서 배포하기(.github 폴더의 .yml 파일 사용하기)
+    - 홈페이지의 지도로딩 실패이슈 해결하기 - 안드로이드 9 이상에서는 HTTP 평문 통신이 기본적으로 사용되지 않습니다.앱에서 네트워크 보안 구성 (https://developer.android.com/training/articles/security-config) 을 통해 *.map.naver.com, *.map.naver.net 에 대한 평문 통신을 허용해 주세요.
