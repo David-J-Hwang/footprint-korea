@@ -152,23 +152,27 @@ function HomePage() {
     <div className="min-h-screen bg-stone-50 text-stone-950 dark:bg-stone-950 dark:text-stone-100">
       <AppHeader />
       <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-6 sm:px-5 lg:grid-cols-[minmax(240px,1fr)_3fr] lg:py-8">
-        <VisitListPanel
-          errorMessage={visitErrorMessage}
-          isLoading={isLoadingVisits}
-          onRequestDeleteVisit={handleRequestDeleteVisit}
-          onSelectVisit={handleSelectVisit}
-          selectedVisitId={selectedVisitId}
-          visits={visits}
-        />
-        <NaverMap
-          onCreateVisit={handleCreateVisitFromRegion}
-          onOpenVisitDetail={handleOpenVisitDetail}
-          onSelectVisit={handleSelectVisit}
-          onViewModeChange={setMapViewMode}
-          selectedVisitId={selectedVisitId}
-          visits={visits}
-          viewMode={mapViewMode}
-        />
+        <div className="order-2 min-w-0 lg:order-1">
+          <VisitListPanel
+            errorMessage={visitErrorMessage}
+            isLoading={isLoadingVisits}
+            onRequestDeleteVisit={handleRequestDeleteVisit}
+            onSelectVisit={handleSelectVisit}
+            selectedVisitId={selectedVisitId}
+            visits={visits}
+          />
+        </div>
+        <div className="order-1 min-w-0 lg:order-2">
+          <NaverMap
+            onCreateVisit={handleCreateVisitFromRegion}
+            onOpenVisitDetail={handleOpenVisitDetail}
+            onSelectVisit={handleSelectVisit}
+            onViewModeChange={setMapViewMode}
+            selectedVisitId={selectedVisitId}
+            visits={visits}
+            viewMode={mapViewMode}
+          />
+        </div>
       </main>
       <ConfirmDialog
         errorMessage={deleteErrorMessage}
