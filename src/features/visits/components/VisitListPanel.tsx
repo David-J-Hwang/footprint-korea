@@ -1,11 +1,19 @@
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
   PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline'
-import type { KeyboardEvent } from 'react'
+import {
+  useMemo,
+  useState,
+  type KeyboardEvent,
+} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { Visit } from '../visitTypes'
 import VisitCategoryBadge from './VisitCategoryBadge'
+
+const VISITS_PER_PAGE = 6
 
 type VisitListPanelProps = {
   errorMessage?: string
@@ -28,6 +36,15 @@ function formatVisitDateRange(startedOn: string | null, endedOn: string | null) 
   return `${startedOn} - ${endedOn}`
 }
 
+function getPaginationButtonClass(isDisabled: boolean) {
+  return [
+    'inline-flex size-9 items-center justify-center rounded-md border transition focus:outline-none focus:ring-4 focus:ring-emerald-700/15 dark:focus:ring-emerald-300/15',
+    isDisabled
+      ? 'cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-600'
+      : 'cursor-pointer border-stone-200 bg-white text-stone-700 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-200 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300',
+  ].join(' ')
+}
+
 function VisitListPanel({
   errorMessage,
   isLoading = false,
@@ -37,6 +54,16 @@ function VisitListPanel({
   visits,
 }: VisitListPanelProps) {
   const navigate = useNavigate()
+  const [currentPage, setCurrentPage] = useState(1)
+  const totalPages = Math.max(1, Math.ceil(visits.length / VISITS_PER_PAGE))
+  const activePage = Math.min(currentPage, totalPages)
+  const pageStartIndex = (activePage - 1) * VISITS_PER_PAGE
+  const pageEndIndex = pageStartIndex + VISITS_PER_PAGE
+  const paginatedVisits = useMemo(
+    () => visits.slice(pageStartIndex, pageEndIndex),
+    [pageEndIndex, pageStartIndex, visits],
+  )
+  const shouldShowPagination = visits.length > VISITS_PER_PAGE
 
   function handleEditVisitClick(visit: Visit) {
     navigate(`/visits/${visit.id}/edit`)
@@ -104,7 +131,7 @@ function VisitListPanel({
 
       {visits.length > 0 ? (
         <div className="mt-6 grid gap-3 lg:min-h-0 lg:flex-1 lg:auto-rows-max lg:overflow-y-auto lg:pr-3">
-          {visits.map((visit) => {
+          {paginatedVisits.map((visit) => {
             const isSelected = selectedVisitId === visit.id
             const visitDateText = formatVisitDateRange(
               visit.started_on,
@@ -175,6 +202,35 @@ function VisitListPanel({
               </div>
             )
           })}
+        </div>
+      ) : null}
+
+      {shouldShowPagination ? (
+        <div className="mt-4 flex shrink-0 items-center justify-between gap-3 border-t border-stone-200 pt-4 dark:border-stone-800">
+          <button
+            aria-label="이전 페이지"
+            className={getPaginationButtonClass(activePage === 1)}
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage(Math.max(1, activePage - 1))}
+            type="button"
+          >
+            <ChevronLeftIcon aria-hidden="true" className="size-4" />
+          </button>
+          <p className="min-w-0 text-center text-sm font-medium text-stone-600 dark:text-stone-300">
+            {activePage} / {totalPages}
+            <span className="ml-2 text-xs text-stone-400 dark:text-stone-500">
+              {pageStartIndex + 1}-{Math.min(pageEndIndex, visits.length)}곳
+            </span>
+          </p>
+          <button
+            aria-label="다음 페이지"
+            className={getPaginationButtonClass(activePage === totalPages)}
+            disabled={activePage === totalPages}
+            onClick={() => setCurrentPage(Math.min(totalPages, activePage + 1))}
+            type="button"
+          >
+            <ChevronRightIcon aria-hidden="true" className="size-4" />
+          </button>
         </div>
       ) : null}
     </aside>
