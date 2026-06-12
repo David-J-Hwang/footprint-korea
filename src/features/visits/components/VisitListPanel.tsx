@@ -156,9 +156,9 @@ function VisitListPanel({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 lg:block">
                       <VisitCategoryBadge category={visit.category} />
-                      <h2 className="min-w-0 text-base font-semibold text-stone-950 dark:text-stone-50">
+                      <h2 className="min-w-0 break-words text-base font-semibold text-stone-950 dark:text-stone-50 lg:mt-2">
                         {visit.title}
                       </h2>
                     </div>
