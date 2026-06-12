@@ -64,6 +64,12 @@ function VisitListPanel({
     [pageEndIndex, pageStartIndex, visits],
   )
   const shouldShowPagination = visits.length > VISITS_PER_PAGE
+  const shouldFitCardsToPanel = paginatedVisits.length >= VISITS_PER_PAGE
+  const visitListClassName = [
+    'mt-6 grid gap-3',
+    'lg:-mx-1 lg:min-h-0 lg:flex-1 lg:overflow-hidden lg:p-1',
+    shouldFitCardsToPanel ? 'lg:grid-rows-6 lg:gap-2' : 'lg:auto-rows-max',
+  ].join(' ')
 
   function handleEditVisitClick(visit: Visit) {
     navigate(`/visits/${visit.id}/edit`)
@@ -130,7 +136,7 @@ function VisitListPanel({
       ) : null}
 
       {visits.length > 0 ? (
-        <div className="mt-6 grid gap-3 lg:min-h-0 lg:flex-1 lg:auto-rows-max lg:overflow-y-auto lg:pr-3">
+        <div className={visitListClassName}>
           {paginatedVisits.map((visit) => {
             const isSelected = selectedVisitId === visit.id
             const visitDateText = formatVisitDateRange(
@@ -144,6 +150,7 @@ function VisitListPanel({
                 aria-pressed={isSelected}
                 className={[
                   'block cursor-pointer rounded-md border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-emerald-700/15 dark:focus:ring-emerald-300/15',
+                  'lg:flex lg:min-h-0 lg:flex-col lg:justify-between lg:overflow-hidden lg:p-3',
                   isSelected
                     ? 'border-emerald-300 bg-emerald-50 shadow-sm dark:border-emerald-500/50 dark:bg-emerald-500/10'
                     : 'border-stone-200 bg-stone-50 hover:border-emerald-200 hover:bg-emerald-50/40 dark:border-stone-800 dark:bg-stone-950 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-500/10',
@@ -158,11 +165,11 @@ function VisitListPanel({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2 lg:block">
                       <VisitCategoryBadge category={visit.category} />
-                      <h2 className="min-w-0 break-words text-base font-semibold text-stone-950 dark:text-stone-50 lg:mt-2">
+                      <h2 className="min-w-0 break-words text-base font-semibold text-stone-950 dark:text-stone-50 lg:mt-1.5 lg:truncate lg:text-sm">
                         {visit.title}
                       </h2>
                     </div>
-                    <p className="mt-2 text-xs text-stone-600 dark:text-stone-400">
+                    <p className="mt-2 text-xs text-stone-600 dark:text-stone-400 lg:mt-1 lg:truncate">
                       {visit.region_name}
                     </p>
                   </div>
@@ -195,7 +202,7 @@ function VisitListPanel({
                   </div>
                 </div>
                 {visitDateText ? (
-                  <p className="mt-3 text-sm font-medium text-stone-700 dark:text-stone-300">
+                  <p className="mt-3 text-sm font-medium text-stone-700 dark:text-stone-300 lg:mt-1.5 lg:truncate lg:text-xs">
                     {visitDateText}
                   </p>
                 ) : null}
