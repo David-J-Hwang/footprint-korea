@@ -182,7 +182,7 @@ function NewVisitPage() {
       <AppHeader />
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-5 lg:py-8">
         <div className="grid gap-6 lg:grid-cols-[minmax(360px,1fr)_minmax(0,1.35fr)] lg:items-start">
-          <section className="min-w-0">
+          <section className="order-2 min-w-0 lg:order-1">
             <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">방문 기록</p>
             <h1 className="mt-1 text-2xl font-semibold text-stone-950 dark:text-stone-50">
               새 방문지 추가하기
@@ -334,11 +334,13 @@ function NewVisitPage() {
             </form>
           </section>
 
-          <VisitLocationMap
-            onSelectLocation={handleSelectLocation}
-            selectedLocation={selectedLocation}
-            selectedRegionCode={regionCode}
-          />
+          <div className="order-1 min-w-0 lg:order-2">
+            <VisitLocationMap
+              onSelectLocation={handleSelectLocation}
+              selectedLocation={selectedLocation}
+              selectedRegionCode={regionCode}
+            />
+          </div>
         </div>
       </main>
     </div>
