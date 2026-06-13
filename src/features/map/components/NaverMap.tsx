@@ -401,23 +401,19 @@ function createRegionInfoWindowContent(
   onCreateVisit?: (region: SelectedRegion) => void,
 ) {
   const content = document.createElement('div')
-  content.className = 'w-52 px-4 py-3 text-stone-900'
+  content.className = 'w-36 px-2 py-1.5 text-stone-900 sm:w-52 sm:px-4 sm:py-3'
 
   const label = document.createElement('p')
-  label.className = 'text-xs font-semibold text-emerald-700'
+  label.className = 'text-[10px] font-semibold text-emerald-700 sm:text-xs'
   label.textContent = '선택한 행정구역'
 
   const title = document.createElement('p')
-  title.className = 'mt-1 text-base font-bold text-stone-950'
+  title.className = 'mt-0.5 text-xs font-bold text-stone-950 sm:mt-1 sm:text-base'
   title.textContent = regionName
-
-  const code = document.createElement('p')
-  code.className = 'mt-1 text-xs text-stone-500'
-  code.textContent = `행정구역 코드 ${regionCode}`
 
   const button = document.createElement('button')
   button.className =
-    'mt-3 h-9 w-full cursor-pointer rounded-md bg-emerald-700 px-3 text-sm font-semibold text-white transition hover:bg-emerald-800'
+    'mx-auto mt-1.5 flex h-6 w-fit cursor-pointer items-center justify-center rounded bg-emerald-700 px-2.5 text-[10px] font-semibold leading-none text-white transition hover:bg-emerald-800 sm:mt-3 sm:h-9 sm:w-full sm:rounded-md sm:px-3 sm:text-sm'
   button.textContent = '+ 새 방문지 추가'
   button.type = 'button'
   button.addEventListener('click', () => {
@@ -429,7 +425,7 @@ function createRegionInfoWindowContent(
     })
   })
 
-  content.append(label, title, code, button)
+  content.append(label, title, button)
 
   return content
 }
